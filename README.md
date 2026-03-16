@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # JobPortal
 
 JobPortal là website hỗ trợ tìm kiếm việc làm được xây dựng bằng ASP.NET Core MVC, Entity Framework Core và SQL Server. Dự án hỗ trợ các vai trò `Admin`, `Employer`, `Candidate`, đồng thời tích hợp AI để tư vấn nghề nghiệp và phân tích CV.
