@@ -1,0 +1,79 @@
+@{
+    ViewData["Title"] = "Tải CV lên kho";
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-lg-7">
+        <div class="d-flex align-items-center mb-4">
+            <a asp-area="Candidate" asp-controller="Cvs" asp-action="Index" class="btn btn-light rounded-circle text-primary me-3 shadow-sm" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div>
+                <h3 class="mb-1 fw-bold text-dark">Tải CV của bạn lên</h3>
+                <p class="text-muted mb-0">PDF, DOC, DOCX (Tối đa 5MB)</p>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+            <div class="card-body p-4 p-md-5 text-center">
+                <form method="post" enctype="multipart/form-data" asp-area="Candidate" asp-controller="Cvs" asp-action="Upload">
+                    @Html.AntiForgeryToken()
+                    
+                    <!-- Box Upload ảo (UI) -->
+                    <div class="upload-zone position-relative px-4 py-5 mb-4" 
+                         style="border: 2px dashed #93c5fd; border-radius: 16px; background-color: #f0f9ff; cursor: pointer; transition: all 0.3s;"
+                         onmouseover="this.style.backgroundColor='#e0f2fe'; this.style.borderColor='#3b82f6';"
+                         onmouseout="this.style.backgroundColor='#f0f9ff'; this.style.borderColor='#93c5fd';"
+                         onclick="document.getElementById('fileInput').click()">
+                         
+                        <div class="d-flex flex-column align-items-center justify-content-center">
+                            <div class="bg-white text-primary mb-3 shadow-sm d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; border-radius: 50%;">
+                                <i class="fa-solid fa-cloud-arrow-up fa-2x"></i>
+                            </div>
+                            <h5 class="fw-bold mb-2">Nhấn để chọn file CV</h5>
+                            <p class="text-muted small mb-0">Hoặc kéo thả file vào khu vực này</p>
+                            
+                            <!-- Hiển thị tên file được chọn -->
+                            <div id="fileNameDisplay" class="mt-3 fw-semibold text-primary" style="display: none; background: white; padding: 8px 16px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                <i class="fa-solid fa-file-lines me-2"></i><span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input thật sự (ẩn đi) -->
+                    <input id="fileInput" class="d-none" type="file" name="file" accept=".pdf,.doc,.docx" required onchange="updateFileName(this)" />
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" id="submitBtn" class="btn btn-primary btn-lg rounded-pill shadow-sm" style="font-weight: 500;" disabled>
+                            <i class="fa-solid fa-circle-check me-2"></i>Tải lên hệ thống
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <p class="small text-muted mb-0"><i class="fa-solid fa-shield-halved me-1 text-success"></i>Dữ liệu của bạn được bảo mật tuyệt đối.</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateFileName(input) {
+            var displayBox = document.getElementById('fileNameDisplay');
+            var nameSpan = displayBox.querySelector('span');
+            var submitBtn = document.getElementById('submitBtn');
+            
+            if (input.files && input.files[0]) {
+                var fileName = input.files[0].name;
+                nameSpan.textContent = fileName;
+                displayBox.style.display = 'inline-block';
+                submitBtn.disabled = false; // Mở khóa nút upload
+            } else {
+                displayBox.style.display = 'none';
+                submitBtn.disabled = true; // Khóa nút
+            }
+        }
+    </script>
+}

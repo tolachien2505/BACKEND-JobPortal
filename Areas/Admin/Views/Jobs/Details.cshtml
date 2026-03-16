@@ -1,0 +1,209 @@
+@model JobPortal.Models.Entities.Job
+
+@{
+    ViewData["Title"] = "Chi tiết tin tuyển dụng";
+    var badgeClass = Model.ModerationStatus switch
+    {
+        "Pending" => "bg-warning text-dark",
+        "Approved" => "bg-success text-white",
+        "Rejected" => "bg-danger text-white",
+        _ => "bg-secondary text-white"
+    };
+    var statusLabel = Model.ModerationStatus switch
+    {
+        "Pending" => "Chờ duyệt",
+        "Approved" => "Đã duyệt",
+        "Rejected" => "Bị từ chối",
+        _ => Model.ModerationStatus
+    };
+}
+
+@section Styles {
+    <style>
+        .admin-job-detail-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+        }
+
+        .admin-job-detail-card .card-body {
+            padding: 1.5rem;
+        }
+
+        .admin-job-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .admin-job-title {
+            font-size: 1.65rem;
+            line-height: 1.35;
+            margin-bottom: 0.35rem;
+            word-break: break-word;
+        }
+
+        .admin-job-subtitle {
+            color: #64748b;
+            margin-bottom: 0;
+        }
+
+        .admin-job-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.9rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .admin-job-meta {
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 0.95rem 1rem;
+            background: #f8fafc;
+        }
+
+        .admin-job-meta-label {
+            color: #64748b;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.35rem;
+        }
+
+        .admin-job-meta-value {
+            color: #0f172a;
+            font-weight: 600;
+            line-height: 1.45;
+        }
+
+        .admin-job-section {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 1.1rem;
+            margin-top: 1.1rem;
+        }
+
+        .admin-job-section h5 {
+            margin-bottom: 0.65rem;
+        }
+
+        .admin-job-content {
+            color: #334155;
+            line-height: 1.75;
+            white-space: pre-line;
+            word-break: break-word;
+        }
+
+        @@media (max-width: 991.98px) {
+            .admin-job-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @@media (max-width: 575.98px) {
+            .admin-job-head {
+                flex-direction: column;
+            }
+
+            .admin-job-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h3 class="mb-1">Chi tiết tin tuyển dụng</h3>
+        <div class="text-muted small">Xem đầy đủ nội dung tin ở chế độ quản trị, kể cả khi chưa duyệt hoặc đã từ chối.</div>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary btn-sm" asp-area="Admin" asp-controller="Jobs" asp-action="Index" asp-route-status="@Model.ModerationStatus">Quay lại danh sách</a>
+        @if (Model.ModerationStatus == "Approved" && Model.IsActive)
+        {
+            <a class="btn btn-outline-primary btn-sm" asp-area="" asp-controller="Jobs" asp-action="Details" asp-route-id="@Model.Id" target="_blank">Mở trang public</a>
+        }
+    </div>
+</div>
+
+<div class="card admin-job-detail-card">
+    <div class="card-body">
+        <div class="admin-job-head">
+            <div>
+                <h1 class="admin-job-title">@Model.Title</h1>
+                <p class="admin-job-subtitle">@Model.Company.CompanyName · @(Model.Category?.Name ?? "Chưa phân loại")</p>
+            </div>
+            <span class="badge @badgeClass fs-6 px-3 py-2 rounded-pill">@statusLabel</span>
+        </div>
+
+        <div class="admin-job-grid">
+            <div class="admin-job-meta">
+                <div class="admin-job-meta-label">Ngày đăng</div>
+                <div class="admin-job-meta-value">@Model.PostedDate.ToString("dd/MM/yyyy")</div>
+            </div>
+            <div class="admin-job-meta">
+                <div class="admin-job-meta-label">Địa điểm</div>
+                <div class="admin-job-meta-value">@(string.IsNullOrWhiteSpace(Model.Location) ? "Chưa cập nhật" : Model.Location)</div>
+            </div>
+            <div class="admin-job-meta">
+                <div class="admin-job-meta-label">Loại hình</div>
+                <div class="admin-job-meta-value">@(string.IsNullOrWhiteSpace(Model.JobType) ? "Chưa cập nhật" : Model.JobType)</div>
+            </div>
+            <div class="admin-job-meta">
+                <div class="admin-job-meta-label">Kinh nghiệm</div>
+                <div class="admin-job-meta-value">@(string.IsNullOrWhiteSpace(Model.ExperienceLevel) ? "Chưa cập nhật" : Model.ExperienceLevel)</div>
+            </div>
+        </div>
+
+        <div class="admin-job-grid">
+            <div class="admin-job-meta">
+                <div class="admin-job-meta-label">Mức lương</div>
+                <div class="admin-job-meta-value">
+                    @if (Model.SalaryMin.HasValue && Model.SalaryMax.HasValue)
+                    {
+                        @($"{Model.SalaryMin.Value:N0} - {Model.SalaryMax.Value:N0} VNĐ")
+                    }
+                    else if (Model.SalaryMin.HasValue)
+                    {
+                        @($"Từ {Model.SalaryMin.Value:N0} VNĐ")
+                    }
+                    else if (Model.SalaryMax.HasValue)
+                    {
+                        @($"Tới {Model.SalaryMax.Value:N0} VNĐ")
+                    }
+                    else
+                    {
+                        @:Thỏa thuận
+                    }
+                </div>
+            </div>
+            <div class="admin-job-meta">
+                <div class="admin-job-meta-label">Số lượng</div>
+                <div class="admin-job-meta-value">@(Model.Vacancies?.ToString() ?? "Chưa cập nhật")</div>
+            </div>
+            <div class="admin-job-meta">
+                <div class="admin-job-meta-label">Trạng thái hiển thị</div>
+                <div class="admin-job-meta-value">@(Model.IsActive ? "Đang bật" : "Đang tắt")</div>
+            </div>
+            <div class="admin-job-meta">
+                <div class="admin-job-meta-label">Ghi chú kiểm duyệt</div>
+                <div class="admin-job-meta-value">@(string.IsNullOrWhiteSpace(Model.ModerationNote) ? "Không có ghi chú" : Model.ModerationNote)</div>
+            </div>
+        </div>
+
+        <div class="admin-job-section">
+            <h5>Mô tả công việc</h5>
+            <div class="admin-job-content">@Model.Description</div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Requirements))
+        {
+            <div class="admin-job-section">
+                <h5>Yêu cầu ứng viên</h5>
+                <div class="admin-job-content">@Model.Requirements</div>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,274 @@
+@{
+    ViewData["Title"] = "Mẫu CV tham khảo";
+
+    var templates = new[]
+    {
+        new { File = "tieu_chuan", Name = "Tiêu chuẩn", Category = "Cơ bản", Desc = "Bố cục rõ ràng, phù hợp mọi ngành nghề" },
+        new { File = "tieu_chuan_it_kinh_nghiem", Name = "Tiêu chuẩn (ít KN)", Category = "Cơ bản", Desc = "Dành cho người ít kinh nghiệm, tập trung kỹ năng" },
+        new { File = "basic", Name = "Basic", Category = "Cơ bản", Desc = "Đơn giản, trực tiếp, dễ đọc" },
+        new { File = "basic_2", Name = "Basic II", Category = "Cơ bản", Desc = "Phiên bản basic nâng cấp giao diện" },
+        new { File = "sinh_vien", Name = "Sinh viên", Category = "Cơ bản", Desc = "Phù hợp sinh viên mới ra trường" },
+        new { File = "hien_dai_1", Name = "Hiện đại", Category = "Hiện đại", Desc = "Thiết kế trẻ trung, phù hợp ngành sáng tạo" },
+        new { File = "hien_dai_6", Name = "Hiện đại VI", Category = "Hiện đại", Desc = "Layout hai cột đẹp mắt" },
+        new { File = "sang_tao", Name = "Sáng tạo", Category = "Hiện đại", Desc = "Thiết kế độc đáo, nổi bật cá tính" },
+        new { File = "bright", Name = "Bright", Category = "Hiện đại", Desc = "Màu sắc tươi sáng, năng động" },
+        new { File = "clarity", Name = "Clarity", Category = "Hiện đại", Desc = "Rõ ràng, mạch lạc, chuyên nghiệp" },
+        new { File = "thanh_lich", Name = "Thanh lịch", Category = "Chuyên nghiệp", Desc = "Trang nhã, phù hợp môi trường công sở" },
+        new { File = "thanh_nha", Name = "Thanh nhã", Category = "Chuyên nghiệp", Desc = "Tinh tế, phù hợp quản lý, văn phòng" },
+        new { File = "toi_gian_2", Name = "Tối giản", Category = "Chuyên nghiệp", Desc = "Minimalist, tập trung nội dung chính" },
+        new { File = "senior", Name = "Senior", Category = "Chuyên nghiệp", Desc = "Dành cho ứng viên nhiều kinh nghiệm" },
+        new { File = "an_tuong", Name = "Ấn tượng", Category = "Nổi bật", Desc = "Gây ấn tượng mạnh với nhà tuyển dụng" },
+        new { File = "an_tuong_2", Name = "Ấn tượng II", Category = "Nổi bật", Desc = "Phiên bản hai cột ấn tượng" },
+        new { File = "an_tuong_3", Name = "Ấn tượng III", Category = "Nổi bật", Desc = "Kết hợp màu sắc và bố cục đẹp" },
+        new { File = "tham_vong", Name = "Tham vọng", Category = "Nổi bật", Desc = "Thể hiện sự quyết tâm và tham vọng" },
+    };
+
+    var categories = templates.Select(t => t.Category).Distinct().ToArray();
+}
+
+@section Styles {
+<style>
+    .cv-hero {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2d5f8a 100%);
+        padding: 32px 0;
+        color: #fff;
+    }
+    .cv-hero h2 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+    .cv-hero-sub { font-size: 14px; opacity: 0.75; }
+
+    .cv-body { padding: 28px 0 50px; background: #f9fafb; }
+
+    .cv-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .cv-count { font-size: 14px; color: #6b7280; }
+    .cv-count strong { color: #1e3a5f; }
+
+    .cv-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .cv-tab {
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        color: #6b7280;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .cv-tab:hover { border-color: #1e3a5f; color: #1e3a5f; }
+    .cv-tab.active { background: #1e3a5f; border-color: #1e3a5f; color: #fff; }
+
+    .cv-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 20px;
+    }
+
+    .cv-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .cv-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.1); transform: translateY(-2px); }
+
+    .cv-thumb {
+        position: relative;
+        overflow: hidden;
+        background: #f3f4f6;
+        aspect-ratio: 210/297;
+    }
+    .cv-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.3s;
+    }
+    .cv-card:hover .cv-thumb img { transform: scale(1.03); }
+
+    .cv-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(30,58,95,0.7);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        opacity: 0;
+        transition: opacity 0.25s;
+    }
+    .cv-card:hover .cv-overlay { opacity: 1; }
+    .cv-overlay-btn {
+        padding: 8px 20px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background 0.15s;
+        cursor: pointer;
+        border: none;
+    }
+    .cv-overlay-btn-view { background: #fff; color: #1e3a5f; }
+    .cv-overlay-btn-view:hover { background: #e5e7eb; }
+    .cv-overlay-btn-dl { background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.4); }
+    .cv-overlay-btn-dl:hover { background: rgba(255,255,255,0.3); }
+
+    .cv-info { padding: 14px 16px; }
+    .cv-name { font-size: 14px; font-weight: 600; color: #111; margin-bottom: 2px; }
+    .cv-desc { font-size: 12px; color: #9ca3af; line-height: 1.4; }
+    .cv-cat-badge {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 10px;
+        background: #e0e7ff;
+        color: #3730a3;
+        margin-top: 6px;
+    }
+
+    /* Preview Modal */
+    .cv-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.75);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 20px;
+    }
+    .cv-modal-overlay.show { display: flex; }
+    .cv-modal-content {
+        background: #fff;
+        border-radius: 12px;
+        max-width: 480px;
+        width: 100%;
+        max-height: 90vh;
+        overflow: auto;
+        position: relative;
+    }
+    .cv-modal-img { width: 100%; display: block; border-radius: 12px 12px 0 0; }
+    .cv-modal-footer {
+        padding: 14px 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .cv-modal-name { font-size: 16px; font-weight: 700; color: #111; }
+    .cv-modal-close {
+        position: absolute;
+        top: 12px; right: 12px;
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        background: rgba(0,0,0,0.5);
+        color: #fff;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.15s;
+    }
+    .cv-modal-close:hover { background: rgba(0,0,0,0.7); }
+</style>
+}
+
+<div class="cv-hero">
+    <div class="container">
+        <h2><i class="fas fa-file-invoice me-2"></i>Mẫu CV tham khảo</h2>
+        <div class="cv-hero-sub">@templates.Length mẫu CV chuyên nghiệp — xem trước và tải về miễn phí</div>
+    </div>
+</div>
+
+<div class="cv-body">
+    <div class="container">
+        <div class="cv-toolbar">
+            <div class="cv-count">Hiển thị <strong id="visibleCount">@templates.Length</strong> / @templates.Length mẫu</div>
+            <div class="cv-tabs">
+                <button class="cv-tab active" onclick="filterCv('all', this)">Tất cả</button>
+                @foreach (var cat in categories)
+                {
+                    <button class="cv-tab" onclick="filterCv('@cat', this)">@cat</button>
+                }
+            </div>
+        </div>
+
+        <div class="cv-grid" id="cvGrid">
+            @foreach (var t in templates)
+            {
+                <div class="cv-card" data-cat="@t.Category">
+                    <div class="cv-thumb">
+                        <img src="/images/cv-templates/@(t.File).webp" alt="@t.Name" loading="lazy" />
+                        <div class="cv-overlay">
+                            <button class="cv-overlay-btn cv-overlay-btn-view" onclick="previewCv('/images/cv-templates/@(t.File).webp', '@t.Name')">
+                                <i class="fas fa-eye me-1"></i>Xem trước
+                            </button>
+                            <a class="cv-overlay-btn cv-overlay-btn-dl" href="/images/cv-templates/@(t.File).webp" download="@(t.File).webp">
+                                <i class="fas fa-download me-1"></i>Tải về
+                            </a>
+                        </div>
+                    </div>
+                    <div class="cv-info">
+                        <div class="cv-name">@t.Name</div>
+                        <div class="cv-desc">@t.Desc</div>
+                        <span class="cv-cat-badge">@t.Category</span>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="cv-modal-overlay" id="cvModal" onclick="if(event.target===this)closeCvModal()">
+    <div class="cv-modal-content">
+        <button class="cv-modal-close" onclick="closeCvModal()"><i class="fas fa-times"></i></button>
+        <img class="cv-modal-img" id="cvModalImg" src="" alt="Preview" />
+        <div class="cv-modal-footer">
+            <span class="cv-modal-name" id="cvModalName"></span>
+            <a id="cvModalDl" href="#" download class="btn btn-sm btn-primary" style="border-radius:6px;">
+                <i class="fas fa-download me-1"></i>Tải về
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function filterCv(cat, btn) {
+        document.querySelectorAll('.cv-tab').forEach(function(t) { t.classList.remove('active'); });
+        btn.classList.add('active');
+        var cards = document.querySelectorAll('.cv-card');
+        var count = 0;
+        cards.forEach(function(c) {
+            if (cat === 'all' || c.dataset.cat === cat) { c.style.display = ''; count++; }
+            else { c.style.display = 'none'; }
+        });
+        document.getElementById('visibleCount').textContent = count;
+    }
+
+    function previewCv(src, name) {
+        document.getElementById('cvModalImg').src = src;
+        document.getElementById('cvModalName').textContent = name;
+        document.getElementById('cvModalDl').href = src;
+        document.getElementById('cvModal').classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeCvModal() {
+        document.getElementById('cvModal').classList.remove('show');
+        document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeCvModal(); });
+</script>
+}

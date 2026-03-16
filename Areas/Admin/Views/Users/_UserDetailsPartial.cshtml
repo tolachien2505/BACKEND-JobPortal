@@ -1,0 +1,193 @@
+@model JobPortal.Models.Entities.ApplicationUser
+
+@{
+    var company = ViewBag.Company as JobPortal.Models.Entities.Company;
+    var applicationCount = (int)ViewBag.ApplicationCount;
+    var savedJobCount = (int)ViewBag.SavedJobCount;
+    var isBanned = (bool)ViewBag.IsBanned;
+    var avatarColor = Model.Role switch { "Admin" => "#dc2626", "Employer" => "#2563eb", "Candidate" => "#16a34a", _ => "#64748b" };
+}
+
+<style>
+    .modal-profile-header {
+        background: linear-gradient(135deg, #1e293b, #334155);
+        padding: 30px;
+        text-align: center;
+        color: #fff;
+    }
+    .modal-profile-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        margin: 0 auto 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        font-weight: bold;
+        color: #fff;
+        border: 3px solid rgba(255,255,255,0.2);
+    }
+    .modal-info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 14px;
+    }
+    .modal-info-row:last-child {
+        border-bottom: none;
+    }
+    .modal-stat-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px;
+        text-align: center;
+    }
+    .badge-role { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+    .badge-admin { background: #fef2f2; color: #dc2626; }
+    .badge-employer { background: #eff6ff; color: #2563eb; }
+    .badge-candidate { background: #f0fdf4; color: #16a34a; }
+    .badge-banned { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .badge-active { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+</style>
+
+<div class="modal-profile-header">
+    <div class="modal-profile-avatar" style="background:@avatarColor;">
+        @(string.IsNullOrEmpty(Model.FullName) ? "?" : Model.FullName[0].ToString().ToUpper())
+    </div>
+    <h5 class="mb-1 fw-bold">@Model.FullName</h5>
+    <div class="opacity-75" style="font-size: 13px;">@Model.Email</div>
+    <div class="mt-2">
+        <span class="badge-role @(Model.Role == "Admin" ? "badge-admin" : Model.Role == "Employer" ? "badge-employer" : "badge-candidate")">
+            @Model.Role
+        </span>
+        @if (isBanned)
+        {
+            <span class="badge-role badge-banned ms-1"><i class="fas fa-ban me-1"></i>Bị khóa</span>
+        }
+    </div>
+</div>
+
+<div class="p-4">
+    <div class="row g-3 mb-4">
+        <div class="col-4">
+            <div class="modal-stat-box">
+                <div class="fs-4 fw-bold text-dark">@applicationCount</div>
+                <div class="text-muted" style="font-size: 12px;">Đơn ứng tuyển</div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="modal-stat-box">
+                <div class="fs-4 fw-bold text-dark">@savedJobCount</div>
+                <div class="text-muted" style="font-size: 12px;">Việc đã lưu</div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="modal-stat-box">
+                <div class="fs-4 fw-bold text-dark">@(company != null ? "1" : "0")</div>
+                <div class="text-muted" style="font-size: 12px;">Công ty</div>
+            </div>
+        </div>
+    </div>
+
+    <h6 class="fw-bold mb-3 text-dark"><i class="fas fa-info-circle me-2 text-primary"></i>Thông tin chung</h6>
+    <div class="modal-info-row">
+        <span class="text-muted fw-medium">Ngày tạo</span>
+        <span class="fw-semibold text-dark">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+    </div>
+    <div class="modal-info-row">
+        <span class="text-muted fw-medium">Trạng thái xác nhận Email</span>
+        <span class="fw-semibold text-dark">@(Model.EmailConfirmed ? "Đã xác nhận" : "Chưa")</span>
+    </div>
+    <div class="modal-info-row">
+        <span class="text-muted fw-medium">Tình trạng tài khoản</span>
+        <span class="fw-semibold text-dark">
+            @if (isBanned)
+            {
+                <span class="text-danger"><i class="fas fa-lock me-1"></i>Bị khóa</span>
+            }
+            else
+            {
+                <span class="text-success"><i class="fas fa-check-circle me-1"></i>Hoạt động</span>
+            }
+        </span>
+    </div>
+
+    @if (company != null)
+    {
+        <h6 class="fw-bold mb-3 mt-4 text-dark"><i class="fas fa-building me-2 text-primary"></i>Thông tin công ty</h6>
+        <div class="modal-info-row">
+            <span class="text-muted fw-medium">Tên công ty</span>
+            <span class="fw-semibold text-dark">@company.CompanyName</span>
+        </div>
+        <div class="modal-info-row">
+            <span class="text-muted fw-medium">Ngành nghề</span>
+            <span class="fw-semibold text-dark">@(company.Industry ?? "—")</span>
+        </div>
+        <div class="modal-info-row">
+            <span class="text-muted fw-medium">Địa chỉ</span>
+            <span class="fw-semibold text-dark">@(company.Address ?? "—")</span>
+        </div>
+        <div class="modal-info-row">
+            <span class="text-muted fw-medium">Quy mô</span>
+            <span class="fw-semibold text-dark">@(company.CompanySize ?? "—")</span>
+        </div>
+    }
+
+    <div class="mt-4 pt-3 border-top text-end">
+        @if (Model.Role != "Admin")
+        {
+            <form method="post" asp-area="Admin" asp-controller="Users" asp-action="Ban" asp-route-id="@Model.Id" style="display:inline;">
+                @if (isBanned)
+                {
+                    <button type="submit" class="btn btn-outline-success btn-sm me-2"><i class="fas fa-unlock me-1"></i>Mở khóa tài khoản</button>
+                }
+                else
+                {
+                    <button type="submit" class="btn btn-outline-warning btn-sm me-2"><i class="fas fa-lock me-1"></i>Khóa tài khoản</button>
+                }
+            </form>
+            
+            <form method="post" asp-area="Admin" asp-controller="Users" asp-action="Delete" asp-route-id="@Model.Id" id="deleteFormModal-@Model.Id" style="display:inline;">
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmDeleteModal(@Model.Id)">
+                    <i class="fas fa-trash me-1"></i>Xóa tài khoản
+                </button>
+            </form>
+        }
+    </div>
+</div>
+
+<script>
+    function confirmDeleteModal(id) {
+        // Need to close current modal first to avoid sweetalert2 z-index issues
+        const modalEl = document.getElementById('userDetailsModal');
+        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+        if (modalInstance) {
+            modalInstance.hide();
+        }
+
+        setTimeout(() => {
+            Swal.fire({
+                title: 'Xin xác nhận!',
+                html: "Bạn có chắc chắn muốn xóa tài khoản này không? <br><small class='text-danger'>Thao tác này sẽ xóa toàn bộ dữ liệu liên quan trong database.</small>",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: '<i class="fas fa-trash me-1"></i> Xóa',
+                cancelButtonText: 'Hủy bỏ'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteFormModal-' + id).submit();
+                } else {
+                    // re-open modal if cancelled
+                    if (modalInstance) {
+                        modalInstance.show();
+                    }
+                }
+            })
+        }, 400); // Wait for modal animation to finish
+    }
+</script>

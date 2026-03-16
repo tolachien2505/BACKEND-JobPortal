@@ -1,0 +1,184 @@
+@model List<JobPortal.Models.Entities.Application>
+
+@{
+    ViewData["Title"] = "Lịch sử ứng tuyển";
+}
+
+@section Styles {
+<style>
+    .history-hero {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2d5f8a 100%);
+        padding: 28px 0;
+        color: #fff;
+    }
+    .history-hero h2 { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+    .history-hero-sub { font-size: 14px; opacity: 0.75; }
+
+    .history-body { padding: 30px 0 50px; }
+
+    .history-stats {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .stat-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 16px 20px;
+        flex: 1;
+        text-align: center;
+    }
+    .stat-num { font-size: 28px; font-weight: 700; color: #1e3a5f; }
+    .stat-label { font-size: 12px; color: #9ca3af; margin-top: 2px; }
+
+    .app-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        transition: box-shadow 0.2s;
+    }
+    .app-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+
+    .app-logo {
+        width: 48px; height: 48px;
+        border-radius: 10px;
+        background: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: 700;
+        color: #1e3a5f;
+        flex-shrink: 0;
+    }
+    .app-info { flex: 1; min-width: 0; }
+    .app-title { font-size: 15px; font-weight: 600; color: #111; margin-bottom: 2px; }
+    .app-company { font-size: 13px; color: #6b7280; }
+    .app-date { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+    .app-date i { margin-right: 3px; }
+    .app-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+    .status-badge {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 20px;
+        white-space: nowrap;
+    }
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-accepted { background: #d1fae5; color: #065f46; }
+    .status-rejected { background: #fee2e2; color: #991b1b; }
+    .status-default { background: #f3f4f6; color: #374151; }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+    .empty-icon {
+        width: 72px; height: 72px;
+        border-radius: 50%;
+        background: #f3f4f6;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 16px;
+    }
+    .empty-icon i { font-size: 28px; color: #9ca3af; }
+    .empty-state h5 { font-weight: 600; color: #374151; margin-bottom: 8px; }
+    .empty-state p { color: #9ca3af; font-size: 14px; margin-bottom: 20px; }
+</style>
+}
+
+<div class="history-hero">
+    <div class="container">
+        <h2><i class="fas fa-file-alt me-2"></i>Lịch sử ứng tuyển</h2>
+        <div class="history-hero-sub">Theo dõi các hồ sơ ứng tuyển của bạn</div>
+    </div>
+</div>
+
+<div class="history-body">
+    <div class="container">
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-file-alt"></i></div>
+                <h5>Chưa có hồ sơ ứng tuyển</h5>
+                <p>Bạn chưa ứng tuyển công việc nào. Hãy tìm kiếm và ứng tuyển ngay!</p>
+                <a class="btn btn-primary px-4" asp-area="" asp-controller="Jobs" asp-action="Index">
+                    <i class="fas fa-search me-2"></i>Tìm việc làm
+                </a>
+            </div>
+        }
+        else
+        {
+            var pending = Model.Count(a => a.Status == "Pending" || a.Status == "Chờ duyệt");
+            var accepted = Model.Count(a => a.Status == "Accepted" || a.Status == "Đã duyệt");
+            var rejected = Model.Count(a => a.Status == "Rejected" || a.Status == "Từ chối");
+            <div class="history-stats">
+                <div class="stat-card">
+                    <div class="stat-num">@Model.Count</div>
+                    <div class="stat-label">Tổng hồ sơ</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-num" style="color:#f59e0b;">@pending</div>
+                    <div class="stat-label">Chờ duyệt</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-num" style="color:#10b981;">@accepted</div>
+                    <div class="stat-label">Đã duyệt</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-num" style="color:#ef4444;">@rejected</div>
+                    <div class="stat-label">Từ chối</div>
+                </div>
+            </div>
+
+            @foreach (var a in Model)
+            {
+                var statusClass = a.Status switch
+                {
+                    "Pending" or "Chờ duyệt" => "status-pending",
+                    "Accepted" or "Đã duyệt" => "status-accepted",
+                    "Rejected" or "Từ chối" => "status-rejected",
+                    _ => "status-default"
+                };
+                var statusText = a.Status switch
+                {
+                    "Pending" => "Chờ duyệt",
+                    "Accepted" => "Đã duyệt",
+                    "Rejected" => "Từ chối",
+                    _ => a.Status
+                };
+
+                <div class="app-card">
+                    <div class="app-logo">
+                        @(a.Job.Company.CompanyName.Length > 0 ? a.Job.Company.CompanyName[0].ToString().ToUpper() : "C")
+                    </div>
+                    <div class="app-info">
+                        <div class="app-title">@a.Job.Title</div>
+                        <div class="app-company"><i class="fas fa-building me-1"></i>@a.Job.Company.CompanyName</div>
+                        <div class="app-date"><i class="far fa-calendar-alt"></i>Ứng tuyển ngày @a.AppliedDate.ToString("dd/MM/yyyy")</div>
+                    </div>
+                    <span class="status-badge @statusClass">@statusText</span>
+                    <div class="app-actions">
+                        <a class="btn btn-sm btn-outline-primary" style="border-radius:6px;font-size:12px;"
+                           asp-area="" asp-controller="Jobs" asp-action="Details" asp-route-id="@a.JobId">
+                            <i class="fas fa-eye me-1"></i>Xem
+                        </a>
+                        @if (!string.IsNullOrWhiteSpace(a.ResumePath))
+                        {
+                            <a class="btn btn-sm btn-outline-secondary" style="border-radius:6px;font-size:12px;"
+                               href="@a.ResumePath" target="_blank" rel="noopener">
+                                <i class="fas fa-file-pdf me-1"></i>CV
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

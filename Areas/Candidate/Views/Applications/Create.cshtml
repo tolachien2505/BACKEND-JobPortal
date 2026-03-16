@@ -1,0 +1,222 @@
+@model JobPortal.Models.Entities.Application
+@{
+    var job = (JobPortal.Models.Entities.Job)ViewBag.Job;
+    var userCvs = ViewBag.UserCvs as IList<JobPortal.Models.Entities.UserCv> ?? new List<JobPortal.Models.Entities.UserCv>();
+    ViewData["Title"] = "Ứng tuyển - " + job.Title;
+}
+
+@section Styles {
+<style>
+    .apply-hero {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2d5f8a 100%);
+        padding: 28px 0;
+        color: #fff;
+    }
+    .apply-hero h2 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .apply-hero-sub { font-size: 14px; opacity: 0.8; }
+    .apply-hero-sub i { margin-right: 4px; }
+
+    .apply-body { padding: 30px 0 50px; }
+
+    .apply-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 28px;
+    }
+    .apply-card h5 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1e3a5f;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .apply-form-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 6px;
+    }
+    .apply-form-help {
+        font-size: 12px;
+        color: #9ca3af;
+        margin-top: 4px;
+    }
+
+    .apply-form-control {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 14px;
+        transition: border-color 0.2s;
+    }
+    .apply-form-control:focus {
+        border-color: #1e3a5f;
+        box-shadow: 0 0 0 3px rgba(30,58,95,0.08);
+    }
+
+    .apply-submit {
+        background: #1e3a5f;
+        color: #fff;
+        border: none;
+        padding: 12px 32px;
+        font-size: 15px;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: background 0.2s;
+    }
+    .apply-submit:hover { background: #163050; }
+
+    .apply-back {
+        color: #6b7280;
+        text-decoration: none;
+        font-size: 14px;
+        padding: 12px 20px;
+        transition: color 0.15s;
+    }
+    .apply-back:hover { color: #1e3a5f; }
+
+    .job-summary-card {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 18px;
+    }
+    .job-summary-title { font-size: 15px; font-weight: 600; color: #111; margin-bottom: 4px; }
+    .job-summary-company { font-size: 13px; color: #6b7280; margin-bottom: 10px; }
+    .job-summary-meta { font-size: 12px; color: #9ca3af; }
+    .job-summary-meta span { margin-right: 12px; }
+    .job-summary-salary {
+        font-size: 15px;
+        font-weight: 700;
+        color: #059669;
+        margin-top: 10px;
+    }
+
+    .cv-option {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .cv-option:hover { border-color: #1e3a5f; background: #f9fafb; }
+    .cv-option input[type="radio"] { accent-color: #1e3a5f; }
+    .cv-option-name { font-size: 14px; font-weight: 500; color: #111; }
+    .cv-option-default { font-size: 11px; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 10px; }
+</style>
+}
+
+<div class="apply-hero">
+    <div class="container">
+        <h2><i class="fas fa-paper-plane me-2"></i>Ứng tuyển vị trí</h2>
+        <div class="apply-hero-sub">
+            <i class="fas fa-briefcase"></i>@job.Title
+            <span class="mx-2">•</span>
+            <i class="fas fa-building"></i>@job.Company.CompanyName
+        </div>
+    </div>
+</div>
+
+<div class="apply-body">
+    <div class="container">
+        <div class="row g-4 justify-content-center">
+            <!-- Form -->
+            <div class="col-lg-7">
+                <form method="post" enctype="multipart/form-data" asp-area="Candidate" asp-controller="Applications" asp-action="Create">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="jobId" value="@Model.JobId" />
+
+                    <div class="apply-card">
+                        <h5><i class="fas fa-pen me-2"></i>Thông tin ứng tuyển</h5>
+
+                        <!-- Cover Letter -->
+                        <div class="mb-4">
+                            <label class="apply-form-label">Thư giới thiệu</label>
+                            <textarea class="form-control apply-form-control" name="coverLetter" rows="5"
+                                      placeholder="Giới thiệu ngắn gọn về bản thân, kinh nghiệm và lý do bạn phù hợp với vị trí này..."></textarea>
+                            <div class="apply-form-help">Tùy chọn — nhưng một thư giới thiệu tốt sẽ giúp bạn nổi bật hơn.</div>
+                        </div>
+
+                        <!-- Saved CVs -->
+                        @if (userCvs.Any())
+                        {
+                            <div class="mb-4">
+                                <label class="apply-form-label">Chọn CV đã lưu</label>
+                                <div>
+                                    <label class="cv-option">
+                                        <input type="radio" name="selectedCvId" value="" checked />
+                                        <span class="cv-option-name" style="color:#6b7280;">Không dùng CV đã lưu</span>
+                                    </label>
+                                    @foreach (var c in userCvs)
+                                    {
+                                        <label class="cv-option">
+                                            <input type="radio" name="selectedCvId" value="@c.Id" />
+                                            <i class="fas fa-file-pdf" style="color:#ef4444;"></i>
+                                            <span class="cv-option-name">@c.FileName</span>
+                                            @if (c.IsDefault)
+                                            {
+                                                <span class="cv-option-default">Mặc định</span>
+                                            }
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Upload New -->
+                        <div class="mb-4">
+                            <label class="apply-form-label">Hoặc tải CV mới</label>
+                            <input class="form-control apply-form-control" type="file" name="resumeFile" accept=".pdf,.doc,.docx" />
+                            <div class="apply-form-help">Hỗ trợ định dạng PDF, DOC, DOCX. Tối đa 10MB.</div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex align-items-center gap-3 mt-3">
+                        <button class="apply-submit" type="submit">
+                            <i class="fas fa-paper-plane me-2"></i>Gửi hồ sơ ứng tuyển
+                        </button>
+                        <a class="apply-back" asp-area="" asp-controller="Jobs" asp-action="Details" asp-route-id="@job.Id">
+                            <i class="fas fa-arrow-left me-1"></i>Quay lại
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Job Summary -->
+            <div class="col-lg-4">
+                <div class="job-summary-card" style="position:sticky;top:80px;">
+                    <div class="job-summary-title">@job.Title</div>
+                    <div class="job-summary-company"><i class="fas fa-building me-1"></i>@job.Company.CompanyName</div>
+                    <div class="job-summary-meta">
+                        @if (!string.IsNullOrWhiteSpace(job.Location))
+                        {
+                            <span><i class="fas fa-map-marker-alt me-1"></i>@job.Location</span>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(job.JobType))
+                        {
+                            <span><i class="fas fa-clock me-1"></i>@job.JobType</span>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(job.ExperienceLevel))
+                        {
+                            <span><i class="fas fa-star me-1"></i>@job.ExperienceLevel</span>
+                        }
+                    </div>
+                    @if (job.SalaryMin is not null || job.SalaryMax is not null)
+                    {
+                        <div class="job-summary-salary">
+                            <i class="fas fa-money-bill-wave me-1"></i>@($"{job.SalaryMin:N0}") - @($"{job.SalaryMax:N0}") VNĐ
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

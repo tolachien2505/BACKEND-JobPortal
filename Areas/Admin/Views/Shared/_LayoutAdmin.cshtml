@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - JobPortal Admin</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --sidebar-width: 250px;
+            --sidebar-bg: #1e293b;
+            --sidebar-hover: #334155;
+            --sidebar-active: #3b82f6;
+            --topbar-height: 56px;
+        }
+        body { margin: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f1f5f9; }
+
+        /* ===== SIDEBAR ===== */
+        .admin-sidebar {
+            position: fixed; top: 0; left: 0; bottom: 0;
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            color: #cbd5e1;
+            z-index: 1040;
+            display: flex; flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+        .admin-sidebar .sidebar-brand {
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid #334155;
+        }
+        .admin-sidebar .sidebar-brand a {
+            color: #fff; text-decoration: none; font-size: 18px; font-weight: 700;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .admin-sidebar .sidebar-brand a i { color: #60a5fa; font-size: 20px; }
+
+        .sidebar-nav { padding: 12px 0; flex: 1; overflow-y: auto; }
+        .sidebar-nav .nav-label {
+            padding: 10px 20px 6px; font-size: 11px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: .5px; color: #64748b;
+        }
+        .sidebar-nav a {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 20px; color: #94a3b8; text-decoration: none;
+            font-size: 14px; transition: all 0.15s; border-left: 3px solid transparent;
+        }
+        .sidebar-nav a:hover { background: var(--sidebar-hover); color: #e2e8f0; }
+        .sidebar-nav a.active {
+            color: #fff; background: rgba(59,130,246,0.12);
+            border-left-color: var(--sidebar-active);
+        }
+        .sidebar-nav a.active i { color: var(--sidebar-active); }
+        .sidebar-nav a i { width: 20px; text-align: center; font-size: 15px; }
+
+        .sidebar-footer {
+            padding: 16px 20px; border-top: 1px solid #334155;
+            font-size: 12px; color: #64748b;
+        }
+
+        /* ===== TOPBAR ===== */
+        .admin-topbar {
+            position: fixed; top: 0; right: 0;
+            left: var(--sidebar-width);
+            height: var(--topbar-height);
+            background: #fff; border-bottom: 1px solid #e2e8f0;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 24px; z-index: 1030;
+            transition: left 0.3s ease;
+        }
+        .admin-topbar .topbar-title { font-size: 16px; font-weight: 600; color: #1e293b; }
+        .admin-topbar .topbar-actions { display: flex; align-items: center; gap: 12px; }
+
+        .admin-user-btn {
+            display: flex; align-items: center; gap: 8px;
+            background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px;
+            padding: 6px 14px; font-size: 13px; font-weight: 600;
+            color: #334155; cursor: pointer; text-decoration: none;
+        }
+        .admin-user-btn:hover { background: #e2e8f0; color: #1e293b; }
+        .admin-user-btn .avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: #3b82f6; color: #fff; display: flex;
+            align-items: center; justify-content: center; font-size: 12px; font-weight: 700;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .admin-main {
+            margin-left: var(--sidebar-width);
+            padding-top: calc(var(--topbar-height) + 24px);
+            padding-left: 24px; padding-right: 24px; padding-bottom: 24px;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* ===== MOBILE TOGGLE ===== */
+        .sidebar-toggle {
+            display: none; background: none; border: none;
+            font-size: 20px; color: #475569; cursor: pointer; padding: 4px 8px;
+        }
+        .sidebar-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.4); z-index: 1035;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @@media (max-width: 991.98px) {
+            .admin-sidebar { transform: translateX(-100%); }
+            .admin-sidebar.show { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .sidebar-toggle { display: block; }
+            .admin-topbar { left: 0; }
+            .admin-main { margin-left: 0; }
+        }
+    </style>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    @{
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+        var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    }
+
+    <!-- Sidebar Overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-brand">
+            <a asp-area="Admin" asp-controller="Home" asp-action="Index">
+                <i class="fas fa-shield-halved"></i>JobPortal Admin
+            </a>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-label">Tổng quan</div>
+            <a asp-area="Admin" asp-controller="Home" asp-action="Index"
+               class="@(currentController == "Home" ? "active" : "")">
+                <i class="fas fa-chart-pie"></i>Dashboard
+            </a>
+
+            <div class="nav-label">Quản lý nội dung</div>
+            <a asp-area="Admin" asp-controller="Jobs" asp-action="Index"
+               class="@(currentController == "Jobs" ? "active" : "")">
+                <i class="fas fa-briefcase"></i>Duyệt tin tuyển dụng
+            </a>
+            <a asp-area="Admin" asp-controller="Categories" asp-action="Index"
+               class="@(currentController == "Categories" ? "active" : "")">
+                <i class="fas fa-tags"></i>Danh mục ngành nghề
+            </a>
+            <a asp-area="Admin" asp-controller="Applications" asp-action="Index"
+               class="@(currentController == "Applications" ? "active" : "")">
+                <i class="fas fa-file-lines"></i>Đơn ứng tuyển
+            </a>
+
+            <div class="nav-label">Hệ thống</div>
+            <a asp-area="Admin" asp-controller="Users" asp-action="Index"
+               class="@(currentController == "Users" ? "active" : "")">
+                <i class="fas fa-users-gear"></i>Người dùng
+            </a>
+            <a asp-area="Admin" asp-controller="GeminiKeys" asp-action="Index"
+               class="@(currentController == "GeminiKeys" ? "active" : "")">
+                <i class="fas fa-key"></i>AI API Keys
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div>&copy; @DateTime.Now.Year Học phần BACK END</div>
+            <div>Thực hiện bởi Vũ Văn Chiến, Nguyễn Mạnh Lâm</div>
+        </div>
+    </aside>
+
+    <!-- Topbar -->
+    <header class="admin-topbar">
+        <div class="d-flex align-items-center gap-3">
+            <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <span class="topbar-title">@ViewData["Title"]</span>
+        </div>
+        <div class="topbar-actions">
+            <a class="text-decoration-none text-muted" style="font-size:13px;" asp-area="" asp-controller="Home" asp-action="Index">
+                <i class="fas fa-external-link-alt me-1"></i>Xem trang chủ
+            </a>
+            <div class="dropdown">
+                <button class="admin-user-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="avatar">A</span>ADMIN
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Index"><i class="fas fa-home me-2"></i>Về trang chủ</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form class="d-inline" asp-area="Client" asp-controller="Account" asp-action="Logout" method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="dropdown-item text-danger">
+                                <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        @if (TempData["Success"] is string success)
+        {
+            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
+                <i class="fas fa-check-circle me-2"></i>@success
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Error"] is string error)
+        {
+            <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>@error
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @RenderBody()
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('adminSidebar').classList.toggle('show');
+            document.getElementById('sidebarOverlay').classList.toggle('show');
+        }
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,417 @@
+@model JobPortal.Models.ViewModels.Jobs.JobSearchViewModel
+@using PagedList.Core.Mvc
+
+@{
+    ViewData["Title"] = "Tìm việc làm";
+    var totalResults = Model.Results?.TotalItemCount ?? 0;
+}
+
+@section Styles {
+<style>
+    .jobs-hero {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2d5f8a 100%);
+        padding: 32px 0;
+        color: #fff;
+    }
+    .jobs-hero h2 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+    .jobs-hero-sub { font-size: 14px; opacity: 0.75; margin-bottom: 20px; }
+
+    .search-bar {
+        background: #fff;
+        border-radius: 10px;
+        padding: 16px 20px;
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+    }
+    .search-bar .form-group { flex: 1; }
+    .search-bar label { font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: block; }
+    .search-bar .form-control, .search-bar .form-select {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+    .search-bar .form-control:focus, .search-bar .form-select:focus { border-color: #1e3a5f; box-shadow: 0 0 0 3px rgba(30,58,95,0.08); }
+    .search-btn {
+        background: #1e3a5f;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 24px;
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+        transition: background 0.2s;
+    }
+    .search-btn:hover { background: #163050; }
+
+    .jobs-body { padding: 24px 0 40px; background: #f9fafb; min-height: 60vh; }
+
+    /* Sidebar */
+    .filter-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 20px;
+    }
+    .filter-card h6 {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1e3a5f;
+        margin-bottom: 16px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .filter-card h6 a { font-size: 11px; font-weight: 500; color: #ef4444; text-decoration: none; }
+    .filter-card h6 a:hover { text-decoration: underline; }
+    .filter-label { font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px; }
+    .filter-select {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 13px;
+        padding: 8px 10px;
+        width: 100%;
+        color: #374151;
+    }
+    .filter-select:focus { border-color: #1e3a5f; outline: none; box-shadow: 0 0 0 2px rgba(30,58,95,0.08); }
+    .filter-apply {
+        width: 100%;
+        background: #1e3a5f;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .filter-apply:hover { background: #163050; }
+
+    /* Toolbar */
+    .result-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+    .result-count { font-size: 14px; color: #374151; }
+    .result-count strong { color: #1e3a5f; }
+    .sort-select { border: 1px solid #e5e7eb; border-radius: 6px; font-size: 12px; padding: 6px 10px; }
+
+    /* Job Cards */
+    .jcard {
+        display: block;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 18px 20px;
+        margin-bottom: 12px;
+        text-decoration: none;
+        color: inherit;
+        transition: box-shadow 0.2s, border-color 0.2s;
+    }
+    .jcard:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); border-color: #1e3a5f; color: inherit; }
+
+    .jcard-top { display: flex; gap: 14px; align-items: flex-start; }
+    .jcard-logo {
+        width: 50px; height: 50px;
+        border-radius: 10px;
+        background: #f3f4f6;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 20px; font-weight: 700; color: #1e3a5f;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+    .jcard-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 4px;
+    }
+    .jcard-body { flex: 1; min-width: 0; }
+    .jcard-title { font-size: 16px; font-weight: 600; color: #111; margin-bottom: 3px; }
+    .jcard-company { font-size: 13px; color: #6b7280; margin-bottom: 6px; }
+    .jcard-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .jcard-tag {
+        font-size: 11px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+    .jcard-tag-featured { background: #dcfce7; color: #166534; }
+
+    .jcard-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 10px;
+        border-top: 1px solid #f3f4f6;
+    }
+    .jcard-salary { font-size: 14px; font-weight: 700; color: #059669; }
+    .jcard-date { font-size: 12px; color: #9ca3af; }
+
+    /* Empty */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+    }
+    .empty-icon {
+        width: 64px; height: 64px;
+        border-radius: 50%;
+        background: #f3f4f6;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 14px;
+    }
+    .empty-icon i { font-size: 24px; color: #9ca3af; }
+    .empty-state h5 { font-weight: 600; color: #374151; margin-bottom: 6px; }
+    .empty-state p { color: #9ca3af; font-size: 14px; margin-bottom: 16px; }
+
+    /* Pagination */
+    .pagination .page-link {
+        border: 1px solid #e5e7eb;
+        color: #374151;
+        font-size: 13px;
+        padding: 8px 14px;
+        border-radius: 6px;
+        margin: 0 2px;
+    }
+    .pagination .page-item.active .page-link { background: #1e3a5f; border-color: #1e3a5f; color: #fff; }
+    .pagination .page-link:hover { background: #f3f4f6; }
+
+    @@media (max-width: 768px) {
+        .search-bar { flex-direction: column; }
+        .jcard-bottom { flex-direction: column; gap: 6px; align-items: flex-start; }
+    }
+</style>
+}
+
+<!-- Hero + Search -->
+<div class="jobs-hero">
+    <div class="container">
+        <h2><i class="fas fa-briefcase me-2"></i>Tìm việc làm</h2>
+        <div class="jobs-hero-sub">Khám phá hàng ngàn cơ hội nghề nghiệp phù hợp với bạn</div>
+
+        <form asp-controller="Jobs" asp-action="Index" method="get">
+            <div class="search-bar">
+                <div class="form-group">
+                    <label>Từ khóa</label>
+                    <input type="text" class="form-control" name="Keyword" value="@Model.Keyword" placeholder="VD: .NET, Marketing..." />
+                </div>
+                <div class="form-group">
+                    <label>Ngành nghề</label>
+                    <select class="form-select" name="CategoryId">
+                        <option value="">Tất cả ngành</option>
+                        @foreach (var c in Model.Categories)
+                        {
+                            <option value="@c.Id" selected="@(Model.CategoryId == c.Id)">@c.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Địa điểm</label>
+                    <input type="text" class="form-control" name="Location" value="@Model.Location" placeholder="VD: Hà Nội, Remote..." />
+                </div>
+                <button type="submit" class="search-btn"><i class="fas fa-search me-1"></i>Tìm kiếm</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Body -->
+<div class="jobs-body">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Sidebar -->
+            <div class="col-lg-3">
+                <div class="filter-card">
+                    <h6>
+                        <span><i class="fas fa-sliders-h me-2"></i>Bộ lọc</span>
+                        @if (Model.CategoryId.HasValue || !string.IsNullOrWhiteSpace(Model.Location) ||
+                             !string.IsNullOrWhiteSpace(Model.JobType) || !string.IsNullOrWhiteSpace(Model.ExperienceLevel) ||
+                             Model.SalaryMin.HasValue)
+                        {
+                            <a asp-controller="Jobs" asp-action="Index">Xóa lọc</a>
+                        }
+                    </h6>
+                    <form method="get" asp-controller="Jobs" asp-action="Index">
+                        <input type="hidden" name="Keyword" value="@Model.Keyword" />
+                        <input type="hidden" name="PageSize" value="@Model.PageSize" />
+
+                        <div class="mb-3">
+                            <div class="filter-label">Loại hình</div>
+                            <select class="filter-select" name="JobType">
+                                <option value="">Tất cả</option>
+                                @foreach (var jt in new[] { "Full-time", "Part-time", "Internship", "Contract" })
+                                {
+                                    <option value="@jt" selected="@(Model.JobType == jt)">@jt</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <div class="filter-label">Kinh nghiệm</div>
+                            <select class="filter-select" name="ExperienceLevel">
+                                <option value="">Tất cả</option>
+                                @foreach (var ex in new[] { "Fresher", "Junior", "Mid", "Senior" })
+                                {
+                                    <option value="@ex" selected="@(Model.ExperienceLevel == ex)">@ex</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <div class="filter-label">Lương tối thiểu</div>
+                            <select class="filter-select" name="SalaryMin">
+                                <option value="">Tất cả</option>
+                                <option value="5000000" selected="@(Model.SalaryMin == 5000000)">5 triệu+</option>
+                                <option value="10000000" selected="@(Model.SalaryMin == 10000000)">10 triệu+</option>
+                                <option value="15000000" selected="@(Model.SalaryMin == 15000000)">15 triệu+</option>
+                                <option value="20000000" selected="@(Model.SalaryMin == 20000000)">20 triệu+</option>
+                                <option value="30000000" selected="@(Model.SalaryMin == 30000000)">30 triệu+</option>
+                            </select>
+                        </div>
+                        <button class="filter-apply" type="submit"><i class="fas fa-check me-1"></i>Áp dụng</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Jobs List -->
+            <div class="col-lg-9">
+                <div class="result-toolbar">
+                    <div class="result-count">
+                        Tìm thấy <strong>@totalResults</strong> việc làm
+                    </div>
+                    <select class="sort-select" onchange="this.value && (window.location = this.value);">
+                        <option value="">Mới nhất</option>
+                    </select>
+                </div>
+
+                @if (Model.Results is null || !Model.Results.Any())
+                {
+                    <div class="empty-state">
+                        <div class="empty-icon"><i class="fas fa-search"></i></div>
+                        <h5>Không tìm thấy việc làm</h5>
+                        <p>Thử thay đổi từ khóa hoặc bộ lọc để tìm nhiều kết quả hơn</p>
+                        <a class="btn btn-outline-primary" style="border-radius:8px;" asp-controller="Jobs" asp-action="Index">
+                            <i class="fas fa-redo me-1"></i>Xóa bộ lọc
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var job in Model.Results!)
+                    {
+                        var companyName = job.Company?.CompanyName;
+                        var companyInitial = !string.IsNullOrWhiteSpace(companyName)
+                            ? companyName[0].ToString().ToUpperInvariant()
+                            : "C";
+
+                        <a class="jcard" asp-area="" asp-controller="Jobs" asp-action="Details" asp-route-id="@job.Id">
+                            <div class="jcard-top">
+                                <div class="jcard-logo">
+                                    @if (!string.IsNullOrEmpty(job.Company?.Logo))
+                                    {
+                                        <img src="@job.Company.Logo" alt="@(companyName ?? "Company")" />
+                                    }
+                                    else
+                                    {
+                                        @companyInitial
+                                    }
+                                </div>
+                                <div class="jcard-body">
+                                    <div class="jcard-title">@job.Title</div>
+                                    <div class="jcard-company">
+                                        <i class="fas fa-building me-1"></i>@(companyName ?? "Chưa cập nhật công ty")
+                                    </div>
+                                    <div class="jcard-tags">
+                                        @if (!string.IsNullOrWhiteSpace(job.Location))
+                                        {
+                                            <span class="jcard-tag"><i class="fas fa-map-marker-alt me-1"></i>@job.Location</span>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(job.JobType))
+                                        {
+                                            <span class="jcard-tag"><i class="fas fa-clock me-1"></i>@job.JobType</span>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(job.ExperienceLevel))
+                                        {
+                                            <span class="jcard-tag"><i class="fas fa-star me-1"></i>@job.ExperienceLevel</span>
+                                        }
+                                        @if (job.IsFeatured)
+                                        {
+                                            <span class="jcard-tag jcard-tag-featured"><i class="fas fa-bolt me-1"></i>Nổi bật</span>
+                                        }
+                                    </div>
+                                    <div class="jcard-bottom">
+                                        <div class="jcard-salary">
+                                            @if (job.SalaryMin is not null || job.SalaryMax is not null)
+                                            {
+                                                <i class="fas fa-money-bill-wave me-1"></i><text>@((job.SalaryMin ?? 0).ToString("N0")) - @((job.SalaryMax ?? 0).ToString("N0")) VNĐ</text>
+                                            }
+                                            else
+                                            {
+                                                <span style="color:#9ca3af;font-weight:400;">Thỏa thuận</span>
+                                            }
+                                        </div>
+                                        <div class="jcard-date">
+                                            <i class="far fa-calendar-alt me-1"></i>@job.PostedDate.ToString("dd/MM/yyyy")
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    }
+
+                    <!-- Pagination -->
+                    @if (Model.Results!.PageCount > 1)
+                    {
+                        <nav aria-label="Pagination" class="mt-4">
+                            <ul class="pagination justify-content-center mb-0">
+                                @if (Model.Results.HasPreviousPage)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" asp-action="Index" asp-controller="Jobs"
+                                           asp-route-Keyword="@Model.Keyword" asp-route-CategoryId="@Model.CategoryId"
+                                           asp-route-Location="@Model.Location" asp-route-JobType="@Model.JobType"
+                                           asp-route-ExperienceLevel="@Model.ExperienceLevel" asp-route-SalaryMin="@Model.SalaryMin"
+                                           asp-route-PageSize="@Model.PageSize" asp-route-page="@(Model.Results.PageNumber - 1)">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                }
+                                @for (int i = 1; i <= Model.Results.PageCount; i++)
+                                {
+                                    <li class="page-item @(Model.Results.PageNumber == i ? "active" : "")">
+                                        <a class="page-link" asp-action="Index" asp-controller="Jobs"
+                                           asp-route-Keyword="@Model.Keyword" asp-route-CategoryId="@Model.CategoryId"
+                                           asp-route-Location="@Model.Location" asp-route-JobType="@Model.JobType"
+                                           asp-route-ExperienceLevel="@Model.ExperienceLevel" asp-route-SalaryMin="@Model.SalaryMin"
+                                           asp-route-PageSize="@Model.PageSize" asp-route-page="@i">@i</a>
+                                    </li>
+                                }
+                                @if (Model.Results.HasNextPage)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" asp-action="Index" asp-controller="Jobs"
+                                           asp-route-Keyword="@Model.Keyword" asp-route-CategoryId="@Model.CategoryId"
+                                           asp-route-Location="@Model.Location" asp-route-JobType="@Model.JobType"
+                                           asp-route-ExperienceLevel="@Model.ExperienceLevel" asp-route-SalaryMin="@Model.SalaryMin"
+                                           asp-route-PageSize="@Model.PageSize" asp-route-page="@(Model.Results.PageNumber + 1)">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>

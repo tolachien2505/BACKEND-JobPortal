@@ -1,0 +1,164 @@
+@model JobPortal.Models.Entities.ApplicationUser
+
+@{
+    ViewData["Title"] = "Chi tiết người dùng";
+    var company = ViewBag.Company as JobPortal.Models.Entities.Company;
+    var applicationCount = (int)ViewBag.ApplicationCount;
+    var savedJobCount = (int)ViewBag.SavedJobCount;
+    var isBanned = (bool)ViewBag.IsBanned;
+    var avatarColor = Model.Role switch { "Admin" => "#dc2626", "Employer" => "#2563eb", "Candidate" => "#16a34a", _ => "#64748b" };
+}
+
+@section Styles {
+<style>
+    .profile-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+    .profile-header { background: linear-gradient(135deg, #1e293b, #334155); padding: 32px; text-align: center; color: #fff; }
+    .profile-avatar { width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; color: #fff; border: 3px solid rgba(255,255,255,0.3); }
+    .profile-name { font-size: 20px; font-weight: 700; }
+    .profile-email { font-size: 13px; opacity: 0.8; }
+    .profile-body { padding: 24px; }
+    .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: #64748b; font-weight: 500; }
+    .info-value { color: #1e293b; font-weight: 600; }
+    .stat-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; text-align: center; }
+    .stat-box .val { font-size: 24px; font-weight: 700; color: #1e293b; }
+    .stat-box .label { font-size: 12px; color: #64748b; margin-top: 4px; }
+    .badge-role { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+    .badge-admin { background: #fef2f2; color: #dc2626; }
+    .badge-employer { background: #eff6ff; color: #2563eb; }
+    .badge-candidate { background: #f0fdf4; color: #16a34a; }
+    .badge-banned { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .badge-active { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+</style>
+}
+
+<a class="btn btn-sm btn-outline-secondary mb-3" asp-area="Admin" asp-controller="Users" asp-action="Index">
+    <i class="fas fa-arrow-left me-1"></i>Quay lại danh sách
+</a>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar" style="background:@avatarColor;">
+                    @(string.IsNullOrEmpty(Model.FullName) ? "?" : Model.FullName[0].ToString().ToUpper())
+                </div>
+                <div class="profile-name">@Model.FullName</div>
+                <div class="profile-email">@Model.Email</div>
+                <div class="mt-2">
+                    <span class="badge-role @(Model.Role == "Admin" ? "badge-admin" : Model.Role == "Employer" ? "badge-employer" : "badge-candidate")">
+                        @Model.Role
+                    </span>
+                    @if (isBanned)
+                    {
+                        <span class="badge-role badge-banned ms-1"><i class="fas fa-ban me-1"></i>Bị khóa</span>
+                    }
+                </div>
+            </div>
+            <div class="profile-body">
+                <div class="info-row">
+                    <span class="info-label">ID</span>
+                    <span class="info-value">#@Model.Id</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Ngày tạo</span>
+                    <span class="info-value">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email xác nhận</span>
+                    <span class="info-value">@(Model.EmailConfirmed ? "Đã xác nhận" : "Chưa")</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Trạng thái</span>
+                    <span class="info-value">
+                        @if (isBanned)
+                        {
+                            <span class="badge-role badge-banned">Bị khóa</span>
+                        }
+                        else
+                        {
+                            <span class="badge-role badge-active">Hoạt động</span>
+                        }
+                    </span>
+                </div>
+
+                @if (Model.Role != "Admin")
+                {
+                    <div class="d-flex gap-2 mt-3">
+                        <form method="post" asp-area="Admin" asp-controller="Users" asp-action="Ban" asp-route-id="@Model.Id">
+                            @Html.AntiForgeryToken()
+                            @if (isBanned)
+                            {
+                                <button type="submit" class="btn btn-sm btn-success"><i class="fas fa-unlock me-1"></i>Mở khóa</button>
+                            }
+                            else
+                            {
+                                <button type="submit" class="btn btn-sm btn-warning"><i class="fas fa-lock me-1"></i>Khóa TK</button>
+                            }
+                        </form>
+                        <form method="post" asp-area="Admin" asp-controller="Users" asp-action="Delete" asp-route-id="@Model.Id"
+                              onsubmit="return confirm('Xóa tài khoản này?');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash me-1"></i>Xóa TK</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="row g-3 mb-3">
+            <div class="col-4">
+                <div class="stat-box">
+                    <div class="val">@applicationCount</div>
+                    <div class="label">Đơn ứng tuyển</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="stat-box">
+                    <div class="val">@savedJobCount</div>
+                    <div class="label">Việc đã lưu</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="stat-box">
+                    <div class="val">@(company != null ? "1" : "0")</div>
+                    <div class="label">Công ty</div>
+                </div>
+            </div>
+        </div>
+
+        @if (company != null)
+        {
+            <div class="profile-card">
+                <div class="profile-body">
+                    <h6 class="mb-3" style="font-size:14px;font-weight:700;color:#1e293b;">
+                        <i class="fas fa-building me-2 text-primary"></i>Thông tin công ty
+                    </h6>
+                    <div class="info-row">
+                        <span class="info-label">Tên công ty</span>
+                        <span class="info-value">@company.CompanyName</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Ngành</span>
+                        <span class="info-value">@(company.Industry ?? "—")</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Địa chỉ</span>
+                        <span class="info-value">@(company.Address ?? "—")</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Website</span>
+                        <span class="info-value">@(company.Website ?? "—")</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Quy mô</span>
+                        <span class="info-value">@(company.CompanySize ?? "—")</span>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,236 @@
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<JobPortal.Models.Entities.ApplicationUser> UserMgr
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - JobPortal</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/JobPortal.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="~/css/ai-advisor.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="d-flex flex-column min-vh-100" data-authenticated="@(User.Identity?.IsAuthenticated == true ? "true" : "false")">
+    <header class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                <i class="fas fa-briefcase me-2"></i>JobPortal
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                    aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                            <i class="fas fa-home me-1"></i>Trang chủ
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="jobsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-briefcase me-1"></i>Việc làm
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="jobsDropdown">
+                            <li><a class="dropdown-item" asp-area="" asp-controller="Jobs" asp-action="Index"><i class="fas fa-search me-2"></i>Tìm việc làm</a></li>
+                            @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Candidate"))
+                            {
+                                <li><a class="dropdown-item" asp-area="Candidate" asp-controller="SavedJobs" asp-action="Index"><i class="fas fa-heart me-2"></i>Việc đã lưu</a></li>
+                                <li><a class="dropdown-item" asp-area="Candidate" asp-controller="Applications" asp-action="Index"><i class="fas fa-file-alt me-2"></i>Việc đã ứng tuyển</a></li>
+                            }
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="cvDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-file-alt me-1"></i>Tạo CV
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="cvDropdown">
+                            @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Candidate"))
+                            {
+                                <li><a class="dropdown-item" asp-area="Candidate" asp-controller="Cvs" asp-action="Index"><i class="fas fa-folder-open me-2"></i>Quản lý CV</a></li>
+                                <li><a class="dropdown-item" asp-area="Candidate" asp-controller="Cvs" asp-action="Upload"><i class="fas fa-upload me-2"></i>Tải CV lên</a></li>
+                            }
+                            <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="GuideCv"><i class="fas fa-book me-2"></i>Hướng dẫn viết CV</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="CvTemplates"><i class="fas fa-th-large me-2"></i>Mẫu CV tham khảo</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="AiAdvisor" asp-action="RoadmapPage">
+                            <i class="fas fa-route me-1"></i>Lộ trình
+                        </a>
+                    </li>
+                    
+                    @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-cogs me-1"></i>Quản trị
+                            </a>
+                        </li>
+                    }
+                    
+                    @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Employer"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="Employer" asp-controller="Jobs" asp-action="Index">
+                                <i class="fas fa-building me-1"></i>Nhà tuyển dụng
+                            </a>
+                        </li>
+                    }
+                    
+                    </ul>
+                
+                <ul class="navbar-nav align-items-center">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <li class="nav-item dropdown">
+                            @{
+                                var currentUser = await UserMgr.GetUserAsync(User);
+                                var displayName = currentUser?.FullName ?? User.Identity.Name;
+                            }
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle me-1"></i>@displayName
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="Home" asp-action="Index"><i class="fas fa-cogs me-2"></i>Dashboard</a></li>
+                                }
+                                @if (User.IsInRole("Employer"))
+                                {
+                                    <li><a class="dropdown-item" asp-area="Employer" asp-controller="Jobs" asp-action="Index"><i class="fas fa-briefcase me-2"></i>Quản lý tin</a></li>
+                                    <li><a class="dropdown-item" asp-area="Employer" asp-controller="Company" asp-action="Edit"><i class="fas fa-building me-2"></i>Thông tin công ty</a></li>
+                                }
+                                @if (User.IsInRole("Candidate"))
+                                {
+                                    <li><a class="dropdown-item" asp-area="Candidate" asp-controller="Profile" asp-action="Edit"><i class="fas fa-user me-2"></i>Hồ sơ cá nhân</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-area="Candidate" asp-controller="Applications" asp-action="Index"><i class="fas fa-file-alt me-2"></i>Việc đã ứng tuyển</a></li>
+                                    <li><a class="dropdown-item" asp-area="Candidate" asp-controller="SavedJobs" asp-action="Index"><i class="fas fa-heart me-2"></i>Việc đã lưu</a></li>
+                                }
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form class="d-inline" asp-area="Client" asp-controller="Account" asp-action="Logout" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="Client" asp-controller="Account" asp-action="Login">
+                                <i class="fas fa-sign-in-alt me-1"></i>Đăng nhập
+                            </a>
+                        </li>
+                        <li class="nav-item ms-lg-2">
+                            <a class="btn btn-primary btn-sm px-3 py-2" asp-area="Client" asp-controller="Account" asp-action="Register">
+                                <i class="fas fa-user-plus me-1"></i>Đăng ký
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow-1">
+        @if (TempData["Success"] is string success)
+        {
+            <div class="container mt-3">
+                <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    @success
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        }
+        @if (TempData["Error"] is string error)
+        {
+            <div class="container mt-3">
+                <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    @error
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        }
+        
+        @RenderBody()
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="footer-brand">
+                        <i class="fas fa-briefcase me-2"></i>JobPortal
+                    </div>
+                    <p class="mb-0">
+                        Kết nối ứng viên với nhà tuyển dụng hàng đầu. 
+                        Tìm việc làm nhanh chóng, hiệu quả và uy tín.
+                    </p>
+                </div>
+                <div class="col-lg-2">
+                    <h6 class="footer-title">Cho ứng viên</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><a class="footer-link" asp-controller="Jobs" asp-action="Index">Tìm việc làm</a></li>
+                        <li class="mb-2"><a class="footer-link" asp-area="Client" asp-controller="Account" asp-action="Register">Đăng ký</a></li>
+                        <li class="mb-2"><a class="footer-link" asp-controller="Home" asp-action="GuideCv">Hướng dẫn viết CV</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2">
+                    <h6 class="footer-title">Cho nhà tuyển dụng</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><a class="footer-link" asp-area="Client" asp-controller="Account" asp-action="Register">Đăng tin tuyển dụng</a></li>
+                        <li class="mb-2"><a class="footer-link" href="#">Tìm hồ sơ ứng viên</a></li>
+                        <li class="mb-2"><a class="footer-link" href="#">Liên hệ</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2">
+                    <h6 class="footer-title">Về JobPortal</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><a class="footer-link" href="#">Giới thiệu</a></li>
+                        <li class="mb-2"><a class="footer-link" href="#">Tin tức</a></li>
+                        <li class="mb-2"><a class="footer-link" href="#">Chính sách bảo mật</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2">
+                    <h6 class="footer-title">Liên hệ</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><a class="footer-link" href="mailto:contact@jobportal.com"><i class="fas fa-envelope me-2"></i>contact@jobportal.com</a></li>
+                        <li class="mb-2"><a class="footer-link" href="tel:+84123456789"><i class="fas fa-phone me-2"></i>+84 123 456 789</a></li>
+                    </ul>
+                    <div class="mt-3">
+                        <a href="#" class="footer-link me-3"><i class="fab fa-facebook fa-lg"></i></a>
+                        <a href="#" class="footer-link me-3"><i class="fab fa-linkedin fa-lg"></i></a>
+                        <a href="#" class="footer-link"><i class="fab fa-youtube fa-lg"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; @DateTime.Now.Year Học phần BACK END
+                <span class="mx-2 d-none d-md-inline">|</span>
+                <span class="d-block d-md-inline mt-1 mt-md-0">Thực hiện bởi Vũ Văn Chiến, Nguyễn Mạnh Lâm</span>
+            </div>
+        </div>
+    </footer>
+
+    @await Html.PartialAsync("_AiAdvisorChat")
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/ai-advisor.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

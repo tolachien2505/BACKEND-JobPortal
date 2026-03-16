@@ -1,0 +1,160 @@
+@model List<JobPortal.Models.Entities.SavedJob>
+
+@{
+    ViewData["Title"] = "Việc đã lưu";
+}
+
+@section Styles {
+<style>
+    .saved-hero {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2d5f8a 100%);
+        padding: 28px 0;
+        color: #fff;
+    }
+    .saved-hero h2 { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+    .saved-hero-sub { font-size: 14px; opacity: 0.75; }
+
+    .saved-body { padding: 30px 0 50px; }
+    .saved-count {
+        font-size: 14px;
+        color: #6b7280;
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .saved-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 18px 20px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        transition: box-shadow 0.2s;
+    }
+    .saved-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+
+    .saved-logo {
+        width: 52px; height: 52px;
+        border-radius: 10px;
+        background: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e3a5f;
+        flex-shrink: 0;
+    }
+
+    .saved-info { flex: 1; min-width: 0; }
+    .saved-title { font-size: 15px; font-weight: 600; color: #111; margin-bottom: 3px; }
+    .saved-company { font-size: 13px; color: #6b7280; margin-bottom: 3px; }
+    .saved-meta { font-size: 12px; color: #9ca3af; display: flex; gap: 14px; flex-wrap: wrap; }
+    .saved-meta span i { margin-right: 3px; }
+
+    .saved-salary {
+        font-size: 14px;
+        font-weight: 600;
+        color: #059669;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .saved-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+    .empty-icon {
+        width: 72px; height: 72px;
+        border-radius: 50%;
+        background: #f3f4f6;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 16px;
+    }
+    .empty-icon i { font-size: 28px; color: #9ca3af; }
+    .empty-state h5 { font-weight: 600; color: #374151; margin-bottom: 8px; }
+    .empty-state p { color: #9ca3af; font-size: 14px; margin-bottom: 20px; }
+</style>
+}
+
+<div class="saved-hero">
+    <div class="container">
+        <h2><i class="fas fa-heart me-2"></i>Việc đã lưu</h2>
+        <div class="saved-hero-sub">Các công việc bạn quan tâm</div>
+    </div>
+</div>
+
+<div class="saved-body">
+    <div class="container">
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-heart"></i></div>
+                <h5>Chưa lưu việc làm nào</h5>
+                <p>Bấm biểu tượng <i class="fas fa-heart" style="color:#ef4444;"></i> trên các tin tuyển dụng để lưu lại tại đây.</p>
+                <a class="btn btn-primary px-4" asp-area="" asp-controller="Jobs" asp-action="Index">
+                    <i class="fas fa-search me-2"></i>Tìm việc làm
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="saved-count">
+                <span><strong>@Model.Count</strong> việc làm đã lưu</span>
+                <a class="btn btn-sm btn-outline-primary" style="border-radius:6px;font-size:12px;" asp-area="" asp-controller="Jobs" asp-action="Index">
+                    <i class="fas fa-search me-1"></i>Tìm thêm việc
+                </a>
+            </div>
+
+            @foreach (var s in Model)
+            {
+                <div class="saved-card">
+                    <div class="saved-logo">
+                        @(s.Job.Company.CompanyName.Length > 0 ? s.Job.Company.CompanyName[0].ToString().ToUpper() : "C")
+                    </div>
+                    <div class="saved-info">
+                        <div class="saved-title">@s.Job.Title</div>
+                        <div class="saved-company"><i class="fas fa-building me-1"></i>@s.Job.Company.CompanyName</div>
+                        <div class="saved-meta">
+                            @if (!string.IsNullOrWhiteSpace(s.Job.Location))
+                            {
+                                <span><i class="fas fa-map-marker-alt"></i>@s.Job.Location</span>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(s.Job.JobType))
+                            {
+                                <span><i class="fas fa-clock"></i>@s.Job.JobType</span>
+                            }
+                            <span><i class="fas fa-bookmark"></i>Lưu @s.SavedDate.ToString("dd/MM/yyyy")</span>
+                        </div>
+                    </div>
+                    @if (s.Job.SalaryMin is not null || s.Job.SalaryMax is not null)
+                    {
+                        <div class="saved-salary">
+                            @($"{s.Job.SalaryMin:N0}") - @($"{s.Job.SalaryMax:N0}") <small style="font-weight:400;">VNĐ</small>
+                        </div>
+                    }
+                    <div class="saved-actions">
+                        <a class="btn btn-sm btn-outline-primary" style="border-radius:6px;font-size:12px;"
+                           asp-area="" asp-controller="Jobs" asp-action="Details" asp-route-id="@s.JobId">
+                            <i class="fas fa-eye me-1"></i>Xem
+                        </a>
+                        <form method="post" asp-area="Candidate" asp-controller="SavedJobs" asp-action="Toggle">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="jobId" value="@s.JobId" />
+                            <input type="hidden" name="returnUrl" value="@Url.Action("Index", "SavedJobs", new { area = "Candidate" })" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius:6px;font-size:12px;">
+                                <i class="fas fa-heart-broken me-1"></i>Bỏ lưu
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

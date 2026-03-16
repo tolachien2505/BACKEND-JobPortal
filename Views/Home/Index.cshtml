@@ -1,0 +1,333 @@
+@model JobPortal.Models.ViewModels.Home.HomeIndexViewModel
+@{
+    ViewData["Title"] = "Tìm việc làm nhanh chóng - JobPortal";
+    var categories = Model?.Categories ?? new List<JobPortal.Models.Entities.Category>();
+    var featuredJobs = Model?.FeaturedJobs ?? new List<JobPortal.Models.ViewModels.Home.HomeFeaturedJobCardViewModel>();
+}
+
+<!-- ================= HERO SECTION (TopCV-inspired) ================= -->
+<section class="jp-hero">
+    <div class="container position-relative">
+        <div class="row align-items-center">
+            <!-- Left Content -->
+            <div class="col-lg-7">
+                <h1 class="jp-hero__title">
+                    Tìm việc làm nhanh 24h,<br/>
+                    <span class="jp-hero__title--highlight">việc làm mới nhất trên toàn quốc</span>
+                </h1>
+                <p class="jp-hero__subtitle">
+                    Tiếp cận <strong>10,000+</strong> tin tuyển dụng việc làm mỗi ngày từ hàng nghìn doanh nghiệp uy tín tại Việt Nam
+                </p>
+
+                <!-- Search Box -->
+                <div class="jp-hero-search">
+                    <form asp-controller="Jobs" asp-action="Index" method="get" class="jp-hero-search__form">
+                        <div class="jp-hero-search__input-group">
+                            <div class="jp-hero-search__icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <input type="text" class="jp-hero-search__input" name="Keyword"
+                                   placeholder="Vị trí tuyển dụng, tên công ty..." />
+                        </div>
+                        <div class="jp-hero-search__input-group jp-hero-search__input-group--location">
+                            <div class="jp-hero-search__icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <select class="jp-hero-search__select" name="CategoryId">
+                                <option value="">Tất cả ngành nghề</option>
+                                @foreach (var c in categories)
+                                {
+                                    <option value="@c.Id">@c.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <button type="submit" class="jp-hero-search__btn">
+                            <i class="fas fa-search me-2"></i>Tìm kiếm
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Quick Tags -->
+                <div class="jp-hero__tags">
+                    <span class="jp-hero__tags-label">Từ khóa phổ biến:</span>
+                    <a asp-controller="Jobs" asp-action="Index" asp-route-Keyword=".NET" class="jp-tag">.NET Developer</a>
+                    <a asp-controller="Jobs" asp-action="Index" asp-route-Keyword="Java" class="jp-tag">Java</a>
+                    <a asp-controller="Jobs" asp-action="Index" asp-route-Keyword="PHP" class="jp-tag">PHP</a>
+                    <a asp-controller="Jobs" asp-action="Index" asp-route-Keyword="Marketing" class="jp-tag">Marketing</a>
+                    <a asp-controller="Jobs" asp-action="Index" asp-route-Location="Remote" class="jp-tag">Remote</a>
+                </div>
+            </div>
+
+            <!-- Right: Hero Image -->
+            <div class="col-lg-5 d-none d-lg-block">
+                <img src="~/images/hero-illustration.png" alt="Tìm việc làm" class="jp-hero__image" />
+            </div>
+        </div>
+    </div>
+    <!-- Decorative shapes -->
+    <div class="jp-hero__shape jp-hero__shape--1"></div>
+    <div class="jp-hero__shape jp-hero__shape--2"></div>
+    <div class="jp-hero__shape jp-hero__shape--3"></div>
+</section>
+
+<!-- ================= STATS BAR ================= -->
+<section class="jp-stats-bar">
+    <div class="container">
+        <div class="jp-stats-bar__inner">
+            <div class="jp-stats-bar__item">
+                <div class="jp-stats-bar__icon"><i class="fas fa-briefcase"></i></div>
+                <div>
+                    <div class="jp-stats-bar__value">10,000+</div>
+                    <div class="jp-stats-bar__label">Việc làm đang tuyển</div>
+                </div>
+            </div>
+            <div class="jp-stats-bar__divider"></div>
+            <div class="jp-stats-bar__item">
+                <div class="jp-stats-bar__icon jp-stats-bar__icon--green"><i class="fas fa-building"></i></div>
+                <div>
+                    <div class="jp-stats-bar__value">5,000+</div>
+                    <div class="jp-stats-bar__label">Công ty uy tín</div>
+                </div>
+            </div>
+            <div class="jp-stats-bar__divider"></div>
+            <div class="jp-stats-bar__item">
+                <div class="jp-stats-bar__icon jp-stats-bar__icon--orange"><i class="fas fa-users"></i></div>
+                <div>
+                    <div class="jp-stats-bar__value">50,000+</div>
+                    <div class="jp-stats-bar__label">Ứng viên hoạt động</div>
+                </div>
+            </div>
+            <div class="jp-stats-bar__divider"></div>
+            <div class="jp-stats-bar__item">
+                <div class="jp-stats-bar__icon jp-stats-bar__icon--purple"><i class="fas fa-check-double"></i></div>
+                <div>
+                    <div class="jp-stats-bar__value">20,000+</div>
+                    <div class="jp-stats-bar__label">Việc làm đã tuyển</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ================= FEATURED JOBS ================= -->
+<section class="jp-section bg-white">
+    <div class="container">
+        <div class="jp-section__header">
+            <div>
+                <h2 class="jp-section__title">
+                    <i class="fas fa-fire text-danger me-2"></i>Việc Làm Tốt Nhất
+                </h2>
+                <p class="jp-section__subtitle">Cập nhật liên tục, cơ hội không chờ đợi</p>
+            </div>
+            <a asp-controller="Jobs" asp-action="Index" class="jp-btn-outline">
+                Xem tất cả <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+
+        <div class="row g-3">
+            @foreach (var job in featuredJobs)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <a asp-controller="Jobs" asp-action="Details" asp-route-id="@job.Id" class="jp-job-card">
+                        <div class="jp-job-card__header">
+                            <div class="jp-job-card__logo">
+                                @if (!string.IsNullOrEmpty(job.CompanyLogo))
+                                {
+                                    <img src="@job.CompanyLogo" alt="@job.CompanyName" />
+                                }
+                                else
+                                {
+                                    <span>@(job.CompanyName?.Length > 0 ? job.CompanyName[0].ToString().ToUpper() : "C")</span>
+                                }
+                            </div>
+                            <div class="jp-job-card__info">
+                                <h3 class="jp-job-card__title">@job.Title</h3>
+                                <div class="jp-job-card__company">@(job.CompanyName ?? "Công ty")</div>
+                            </div>
+                        </div>
+                        <div class="jp-job-card__body">
+                            @if (job.SalaryMin.HasValue || job.SalaryMax.HasValue)
+                            {
+                                <div class="jp-job-card__salary">
+                                    <i class="fas fa-money-bill-wave me-1"></i>
+                                    @if (job.SalaryMin.HasValue && job.SalaryMax.HasValue)
+                                    {
+                                        @:@((job.SalaryMin.Value / 1000000).ToString("N0")) - @((job.SalaryMax.Value / 1000000).ToString("N0")) triệu
+                                    }
+                                    else if (job.SalaryMax.HasValue)
+                                    {
+                                        @:Tới @((job.SalaryMax.Value / 1000000).ToString("N0")) triệu
+                                    }
+                                    else
+                                    {
+                                        @:Từ @((job.SalaryMin!.Value / 1000000).ToString("N0")) triệu
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="jp-job-card__salary jp-job-card__salary--negotiate">
+                                    <i class="fas fa-handshake me-1"></i>Thỏa thuận
+                                </div>
+                            }
+                            <div class="jp-job-card__meta">
+                                @if (!string.IsNullOrEmpty(job.Location))
+                                {
+                                    <span class="jp-job-card__meta-pill">
+                                        <i class="fas fa-map-marker-alt"></i> @job.Location
+                                    </span>
+                                }
+                                @if (!string.IsNullOrEmpty(job.JobType))
+                                {
+                                    <span class="jp-job-card__meta-pill">
+                                        <i class="fas fa-clock"></i> @job.JobType
+                                    </span>
+                                }
+                                @if (!string.IsNullOrEmpty(job.ExperienceLevel))
+                                {
+                                    <span class="jp-job-card__meta-pill">
+                                        <i class="fas fa-signal"></i> @job.ExperienceLevel
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                        <div class="jp-job-card__footer">
+                            @if (job.IsFeatured)
+                            {
+                                <span class="jp-badge jp-badge--hot">HOT</span>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(job.CategoryName))
+                            {
+                                <span class="jp-badge jp-badge--category">@job.CategoryName</span>
+                            }
+                            <span class="jp-job-card__time">
+                                <i class="far fa-clock me-1"></i>@job.PostedDate.ToString("dd/MM")
+                            </span>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+
+        @if (!featuredJobs.Any())
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Chưa có việc làm nổi bật. Hãy quay lại sau!</p>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- ================= TOP CATEGORIES ================= -->
+<section class="jp-section jp-section--gray">
+    <div class="container">
+        <div class="jp-section__header">
+            <div>
+                <h2 class="jp-section__title">
+                    <i class="fas fa-th-large text-primary me-2"></i>Top Ngành Nghề Nổi Bật
+                </h2>
+                <p class="jp-section__subtitle">Khám phá các cơ hội nghề nghiệp theo ngành</p>
+            </div>
+            <a asp-controller="Jobs" asp-action="Index" class="jp-btn-outline">
+                Xem tất cả <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+
+        <div class="row g-3">
+            @{
+                var catIcons = new[] { "fa-laptop-code", "fa-chart-line", "fa-calculator", "fa-users-cog", "fa-wrench", "fa-graduation-cap", "fa-heartbeat", "fa-hotel" };
+                var catBgColors = new[] { "#e8f5e9", "#e3f2fd", "#fff3e0", "#fce4ec", "#f3e5f5", "#e0f7fa", "#fff8e1", "#e8eaf6" };
+                var catIconColors = new[] { "#2e7d32", "#1565c0", "#e65100", "#c62828", "#6a1b9a", "#00838f", "#f9a825", "#283593" };
+            }
+            @for (var i = 0; i < categories.Count; i++)
+            {
+                var c = categories[i];
+                var icon = i < catIcons.Length ? catIcons[i] : "fa-briefcase";
+                var bgColor = i < catBgColors.Length ? catBgColors[i] : "#e8f5e9";
+                var iconColor = i < catIconColors.Length ? catIconColors[i] : "#2e7d32";
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a asp-controller="Jobs" asp-action="Index" asp-route-CategoryId="@c.Id" class="jp-category-card">
+                        <div class="jp-category-card__icon" style="background: @bgColor; color: @iconColor;">
+                            <i class="fas @icon fa-2x"></i>
+                        </div>
+                        <h6 class="jp-category-card__name">@c.Name</h6>
+                        <span class="jp-category-card__count">Xem việc làm →</span>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- ================= BANNER SECTION ================= -->
+<section class="jp-banner-section">
+    <div class="container">
+        <div class="jp-banner">
+            <div class="jp-banner__content">
+                <h2 class="jp-banner__title">Bạn là nhà tuyển dụng?</h2>
+                <p class="jp-banner__text">
+                    Đăng tin tuyển dụng <strong>miễn phí</strong>, tiếp cận hàng ngàn ứng viên chất lượng. 
+                    Tìm kiếm nhân tài phù hợp với doanh nghiệp của bạn.
+                </p>
+                <div class="jp-banner__actions">
+                    <a asp-area="Client" asp-controller="Account" asp-action="Register" class="jp-banner__btn jp-banner__btn--primary">
+                        <i class="fas fa-plus me-2"></i>Đăng tin ngay
+                    </a>
+                    <a asp-controller="Jobs" asp-action="Index" class="jp-banner__btn jp-banner__btn--outline">
+                        Tìm ứng viên <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="jp-banner__image d-none d-md-block">
+                <img src="~/images/hero-banner.png" alt="Đăng tin tuyển dụng" />
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ================= WHY CHOOSE US ================= -->
+<section class="jp-section bg-white">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="jp-section__title">Tại Sao Chọn JobPortal?</h2>
+            <p class="jp-section__subtitle">Nền tảng kết nối việc làm hàng đầu</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="jp-feature-card">
+                    <div class="jp-feature-card__icon" style="background: #e8f5e9; color: #2e7d32;">
+                        <i class="fas fa-bolt fa-2x"></i>
+                    </div>
+                    <h5 class="jp-feature-card__title">Tìm việc siêu tốc</h5>
+                    <p class="jp-feature-card__text">
+                        Hàng ngàn việc làm cập nhật mỗi ngày. Bộ lọc thông minh giúp bạn tìm đúng việc trong vài giây.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="jp-feature-card">
+                    <div class="jp-feature-card__icon" style="background: #e3f2fd; color: #1565c0;">
+                        <i class="fas fa-shield-alt fa-2x"></i>
+                    </div>
+                    <h5 class="jp-feature-card__title">Tin tuyển dụng uy tín</h5>
+                    <p class="jp-feature-card__text">
+                        100% tin đăng được kiểm duyệt bởi Admin. Đảm bảo chất lượng, an toàn cho ứng viên.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="jp-feature-card">
+                    <div class="jp-feature-card__icon" style="background: #fff3e0; color: #e65100;">
+                        <i class="fas fa-paper-plane fa-2x"></i>
+                    </div>
+                    <h5 class="jp-feature-card__title">Ứng tuyển dễ dàng</h5>
+                    <p class="jp-feature-card__text">
+                        Tạo CV, gửi hồ sơ chỉ với vài click. Theo dõi trạng thái ứng tuyển tiện lợi, nhanh chóng.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

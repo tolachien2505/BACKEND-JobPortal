@@ -1,0 +1,197 @@
+@model List<JobPortal.Models.Entities.Application>
+
+@{
+    ViewData["Title"] = "Quản lý Ứng viên";
+    var jobs = ViewBag.CompanyJobs as IEnumerable<dynamic>;
+    int? currentJobId = ViewBag.JobId as int?;
+}
+
+<div class="d-flex justify-content-between align-items-end mb-4">
+    <div>
+        <h3 class="mb-1 fw-bold text-gray-900">Quản lý nhận hồ sơ</h3>
+        <div class="text-muted small">Cập nhật nhanh tiến độ tuyển dụng của bạn.</div>
+    </div>
+    
+    <div class="d-flex align-items-center gap-2">
+        <label class="emp-form-label mt-1">Lọc theo việc làm:</label>
+        <form method="get" class="d-flex">
+            <select name="jobId" class="emp-form-control py-2 ps-3 pe-5" style="min-width: 250px;" onchange="this.form.submit()">
+                <option value="">-- Tất cả tin tuyển dụng --</option>
+                @if (jobs != null)
+                {
+                    foreach (var j in jobs)
+                    {
+                        var isSel = (currentJobId == (int)j.Id) ? "selected" : "";
+                        <!option value="@j.Id" @isSel>@j.Title</!option>
+                    }
+                }
+            </select>
+        </form>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="emp-card mb-0 shadow-sm border-0 bg-white" style="border-left: 4px solid #3b82f6 !important;">
+            <div class="emp-card-body py-3 px-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small fw-semibold text-uppercase mb-1">Tổng hồ sơ</div>
+                    <h3 class="fw-bold mb-0 text-gray-900">@Model.Count</h3>
+                </div>
+                <div style="background: #eff6ff; color: #3b82f6; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="emp-card mb-0 shadow-sm border-0 bg-white" style="border-left: 4px solid #eab308 !important;">
+            <div class="emp-card-body py-3 px-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small fw-semibold text-uppercase mb-1">Chờ duyệt</div>
+                    <h3 class="fw-bold mb-0 text-gray-900">@Model.Count(a => a.Status == "Pending")</h3>
+                </div>
+                <div style="background: #fefce8; color: #eab308; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                    <i class="fas fa-hourglass-half"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="emp-card mb-0 shadow-sm border-0 bg-white" style="border-left: 4px solid #8b5cf6 !important;">
+            <div class="emp-card-body py-3 px-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small fw-semibold text-uppercase mb-1">Đang xem xét</div>
+                    <h3 class="fw-bold mb-0 text-gray-900">@Model.Count(a => a.Status == "Reviewing")</h3>
+                </div>
+                <div style="background: #f5f3ff; color: #8b5cf6; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                    <i class="fas fa-eye"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="emp-card mb-0 shadow-sm border-0 bg-white" style="border-left: 4px solid #22c55e !important;">
+            <div class="emp-card-body py-3 px-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small fw-semibold text-uppercase mb-1">Phỏng vấn</div>
+                    <h3 class="fw-bold mb-0 text-gray-900">@Model.Count(a => a.Status == "Interview")</h3>
+                </div>
+                <div style="background: #f0fdf4; color: #22c55e; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="emp-card">
+    <div class="emp-card-header">
+        <h4 class="emp-card-title">Danh sách ứng viên</h4>
+    </div>
+    <div class="p-0">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <div class="text-muted mb-3"><i class="fas fa-inbox fa-3x opacity-50"></i></div>
+                <h6 class="fw-semibold">Chưa có ứng viên nào nộp hồ sơ.</h6>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table mb-0 align-middle" style="font-size: 14px;">
+                    <thead style="background: #f9fafb; color: #4b5563; font-size: 13px; text-transform: uppercase;">
+                        <tr>
+                            <th class="ps-4 py-3 font-weight-semibold">Ứng viên / Ngày nộp</th>
+                            <th class="py-3 font-weight-semibold">Vị trí ứng tuyển</th>
+                            <th class="py-3 font-weight-semibold text-center">Hồ sơ đính kèm</th>
+                            <th class="py-3 font-weight-semibold">Kết quả Xét duyệt</th>
+                            <th class="pe-4 py-3 font-weight-semibold text-end">Cập nhật</th>
+                        </tr>
+                    </thead>
+                    <tbody class="border-top-0">
+                        @foreach (var app in Model)
+                        {
+                            var user = app.User;
+                            var displayName = !string.IsNullOrWhiteSpace(user?.FullName)
+                                ? user.FullName
+                                : user?.Email;
+                            var displayLabel = string.IsNullOrWhiteSpace(displayName) ? "An danh" : displayName;
+                            var userInitial = displayLabel[0].ToString().ToUpperInvariant();
+
+                            <tr style="transition: background 0.2s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='white'">
+                                <td class="ps-4 py-3">
+                                    <div class="fw-semibold text-gray-900 mb-1 d-flex align-items-center gap-2">
+                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                                            @userInitial
+                                        </div>
+                                        <span>@displayLabel</span>
+                                    </div>
+                                    <div class="text-muted ms-5" style="font-size: 12px;">
+                                        <i class="far fa-clock me-1"></i>@app.AppliedDate.ToString("HH:mm - dd/MM/yyyy")
+                                    </div>
+                                </td>
+                                <td class="py-3">
+                                    <div class="fw-medium text-gray-800" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="@app.Job.Title">
+                                        @app.Job.Title
+                                    </div>
+                                    <a asp-area="" asp-controller="Jobs" asp-action="Details" asp-route-id="@app.JobId" class="small text-decoration-none" target="_blank">Xem job <i class="fas fa-external-link-alt ms-1" style="font-size: 10px;"></i></a>
+                                </td>
+                                <td class="py-3 text-center">
+                                    @if (!string.IsNullOrEmpty(app.ResumePath))
+                                    {
+                                        <a href="@app.ResumePath" target="_blank" class="btn btn-sm btn-light text-primary fw-medium px-3 py-1 bg-white border" style="border-radius: 20px;">
+                                            <i class="fas fa-file-pdf text-danger me-1"></i>Xem CV
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Không đính kèm</span>
+                                    }
+                                </td>
+                                <td class="py-3">
+                                    @{
+                                        string badgeClass = app.Status switch
+                                        {
+                                            "Pending" => "bg-warning text-dark",
+                                            "Reviewing" => "bg-info text-dark",
+                                            "Interview" => "bg-primary text-white",
+                                            "Accepted" => "bg-success text-white",
+                                            "Rejected" => "bg-danger text-white",
+                                            _ => "bg-secondary"
+                                        };
+                                        string statusLabel = app.Status switch
+                                        {
+                                            "Pending" => "Đang chờ",
+                                            "Reviewing" => "Đang xem xét",
+                                            "Interview" => "Phỏng vấn",
+                                            "Accepted" => "Tuyển dụng",
+                                            "Rejected" => "Loại",
+                                            _ => app.Status
+                                        };
+                                    }
+                                    <span class="badge @badgeClass fs-6 fw-medium py-1 px-3 rounded-pill">@statusLabel</span>
+                                </td>
+                                <td class="pe-4 py-3 text-end">
+                                    <form method="post" asp-action="UpdateStatus" asp-route-id="@app.Id" class="d-inline-flex gap-2">
+                                        <select name="status" class="emp-form-control py-1 px-2 mb-0 h-auto" style="font-size: 13px;">
+                                            <!option value="Pending" @(app.Status == "Pending" ? "selected" : "")>Chờ duyệt</!option>
+                                            <!option value="Reviewing" @(app.Status == "Reviewing" ? "selected" : "")>Đang xem xét</!option>
+                                            <!option value="Interview" @(app.Status == "Interview" ? "selected" : "")>Phỏng vấn</!option>
+                                            <!option value="Accepted" @(app.Status == "Accepted" ? "selected" : "")>Chấp nhận</!option>
+                                            <!option value="Rejected" @(app.Status == "Rejected" ? "selected" : "")>Từ chối</!option>
+                                        </select>
+                                        <button type="submit" class="btn btn-sm btn-primary py-1 px-2" style="border-radius: 6px;" title="Cập nhật trạng thái">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

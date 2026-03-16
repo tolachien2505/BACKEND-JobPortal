@@ -1,0 +1,185 @@
+@model List<JobPortal.Models.Entities.GeminiApiKey>
+
+@{
+    ViewData["Title"] = "Quản lý API Key Gemini";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3><i class="fas fa-key me-2"></i>Quản lý API Key Gemini AI</h3>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addKeyModal">
+        <i class="fas fa-plus me-1"></i>Thêm API Key
+    </button>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <span class="fw-semibold"><i class="fas fa-list me-1"></i>Danh sách API Key (@Model.Count)</span>
+        @if (Model.Count > 0)
+        {
+            <form asp-action="ResetAllUsage" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-outline-warning btn-sm" onclick="return confirm('Reset bộ đếm cho tất cả key?')">
+                    <i class="fas fa-sync-alt me-1"></i>Reset tất cả
+                </button>
+            </form>
+        }
+    </div>
+    <div class="card-body p-0">
+        @if (Model.Count == 0)
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="fas fa-key fa-3x mb-3"></i>
+                <p>Chưa có API Key nào. Thêm key để sử dụng AI Advisor.</p>
+                <p class="small">Hệ thống sẽ fallback sang key trong <code>appsettings.json</code> nếu không có key trong DB.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Label</th>
+                            <th>API Key</th>
+                            <th>Model</th>
+                            <th>Sử dụng</th>
+                            <th>Ưu tiên</th>
+                            <th>Trạng thái</th>
+                            <th>Lỗi gần nhất</th>
+                            <th class="text-end">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var key in Model)
+                        {
+                            <tr class="@(!key.IsActive ? "table-secondary" : "")">
+                                <td>
+                                    <strong>@(key.Label ?? $"Key #{key.Id}")</strong>
+                                </td>
+                                <td>
+                                    <code class="text-truncate d-inline-block" style="max-width:200px;" title="@key.ApiKey">
+                                        @(key.ApiKey.Length > 20 ? key.ApiKey[..10] + "..." + key.ApiKey[^6..] : key.ApiKey)
+                                    </code>
+                                </td>
+                                <td><span class="badge bg-info">@key.Model</span></td>
+                                <td>
+                                    @key.UsageCount
+                                    @if (key.DailyLimit.HasValue)
+                                    {
+                                        <span class="text-muted">/ @key.DailyLimit</span>
+                                    }
+                                </td>
+                                <td><span class="badge bg-secondary">@key.Priority</span></td>
+                                <td>
+                                    @if (key.IsActive)
+                                    {
+                                        <span class="badge bg-success"><i class="fas fa-check me-1"></i>Hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger"><i class="fas fa-ban me-1"></i>Tắt</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (key.LastErrorAt.HasValue)
+                                    {
+                                        <small class="text-danger" title="@key.LastErrorMessage">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>@key.LastErrorAt.Value.ToString("dd/MM HH:mm")
+                                        </small>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <form asp-action="ToggleActive" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@key.Id" />
+                                        <button type="submit" class="btn btn-sm @(key.IsActive ? "btn-outline-warning" : "btn-outline-success")" title="@(key.IsActive ? "Tắt" : "Bật")">
+                                            <i class="fas @(key.IsActive ? "fa-pause" : "fa-play")"></i>
+                                        </button>
+                                    </form>
+                                    <form asp-action="ResetUsage" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@key.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-info" title="Reset bộ đếm">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </button>
+                                    </form>
+                                    <form asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Xóa API Key này?')">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@key.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-white fw-semibold"><i class="fas fa-info-circle me-1"></i>Hướng dẫn</div>
+    <div class="card-body">
+        <ul class="mb-0">
+            <li>Hệ thống sẽ tự động chuyển sang key tiếp theo khi key hiện tại hết hạn mức hoặc gặp lỗi.</li>
+            <li>Key có <strong>Ưu tiên</strong> thấp hơn sẽ được sử dụng trước.</li>
+            <li><strong>Daily Limit</strong>: Giới hạn số lần gọi/ngày (để trống = không giới hạn).</li>
+            <li>Key bị lỗi sẽ tự động bỏ qua trong 5 phút, sau đó thử lại.</li>
+            <li>Nếu không có key nào trong DB, hệ thống sẽ dùng key trong <code>appsettings.json</code>.</li>
+        </ul>
+    </div>
+</div>
+
+<!-- Add Key Modal -->
+<div class="modal fade" id="addKeyModal" tabindex="-1" aria-labelledby="addKeyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addKeyModalLabel"><i class="fas fa-plus me-2"></i>Thêm API Key</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">API Key <span class="text-danger">*</span></label>
+                        <input type="text" name="apiKey" class="form-control" placeholder="AIzaSy..." required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nhãn (Label)</label>
+                        <input type="text" name="label" class="form-control" placeholder="VD: Key chính, Key dự phòng..." />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Model</label>
+                        <select name="model" class="form-select">
+                            <option value="gemini-2.0-flash">gemini-2.0-flash (Nhanh)</option>
+                            <option value="gemini-2.5-flash">gemini-2.5-flash (Mới nhất)</option>
+                            <option value="gemini-2.5-pro">gemini-2.5-pro (Mạnh nhất)</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-semibold">Daily Limit</label>
+                            <input type="number" name="dailyLimit" class="form-control" placeholder="Để trống = ∞" min="1" />
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-semibold">Ưu tiên (0 = cao nhất)</label>
+                            <input type="number" name="priority" class="form-control" value="0" min="0" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

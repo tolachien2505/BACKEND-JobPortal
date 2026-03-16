@@ -1,0 +1,254 @@
+@{
+    ViewData["Title"] = "Lộ trình nghề nghiệp";
+}
+
+@section Styles {
+<style>
+    .roadmap-hero {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2d5f8a 100%);
+        color: #fff;
+        padding: 40px 0;
+        margin-bottom: 30px;
+    }
+    .roadmap-hero h2 { font-weight: 700; margin-bottom: 6px; }
+    .roadmap-hero p { opacity: 0.85; margin: 0; }
+
+    .roadmap-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: box-shadow 0.2s;
+        margin-bottom: 20px;
+    }
+    .roadmap-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+
+    .roadmap-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 20px;
+        border-bottom: 1px solid #f3f4f6;
+        background: #fafbfc;
+    }
+    .roadmap-card-date { font-size: 13px; color: #6b7280; }
+    .roadmap-card-num {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1e3a5f;
+    }
+
+    .roadmap-section {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    .roadmap-section:last-child { border-bottom: none; }
+    .roadmap-section-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    .roadmap-eval {
+        font-size: 14px;
+        color: #4b5563;
+        line-height: 1.65;
+    }
+
+    .skill-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid #f9fafb;
+    }
+    .skill-row:last-child { border-bottom: none; }
+    .skill-badge {
+        background: #fef3c7;
+        color: #92400e;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 20px;
+        white-space: nowrap;
+    }
+    .skill-desc { font-size: 13px; color: #6b7280; line-height: 1.4; }
+
+    .job-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    .job-row:last-child { border-bottom: none; }
+    .job-title { font-size: 14px; font-weight: 600; color: #111827; }
+    .job-salary { font-size: 12px; color: #059669; font-weight: 500; }
+    .job-reason { font-size: 12px; color: #9ca3af; }
+
+    .roadmap-card-actions {
+        padding: 10px 20px;
+        display: flex;
+        justify-content: flex-end;
+        background: #fafbfc;
+        border-top: 1px solid #f3f4f6;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+    .empty-icon {
+        width: 72px; height: 72px;
+        border-radius: 50%;
+        background: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 18px;
+    }
+    .empty-icon i { font-size: 28px; color: #9ca3af; }
+    .empty-state h5 { font-weight: 600; color: #374151; margin-bottom: 8px; }
+    .empty-state p { color: #9ca3af; max-width: 400px; margin: 0 auto 20px; font-size: 14px; line-height: 1.6; }
+</style>
+}
+
+<div class="roadmap-hero">
+    <div class="container">
+        <h2><i class="fas fa-route me-2"></i>Lộ trình nghề nghiệp</h2>
+        <p>Lưu lại và theo dõi các tư vấn nghề nghiệp của bạn</p>
+    </div>
+</div>
+
+<div class="container" style="margin-bottom:40px;">
+    <div id="roadmapLoading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted">Đang tải...</p>
+    </div>
+
+    <div id="roadmapEmpty" class="empty-state" style="display:none;">
+        <div class="empty-icon">
+            <i class="fas fa-route"></i>
+        </div>
+        <h5>Chưa có lộ trình nào</h5>
+        <p>Hãy sử dụng chức năng <strong>Tư vấn việc làm</strong> (góc phải bên dưới) để nhận tư vấn từ AI. Sau khi có kết quả, bấm "Lưu lộ trình" để lưu tại đây.</p>
+        <button class="btn btn-primary px-4" onclick="document.getElementById('aiChatBubble')?.click();">
+            <i class="fas fa-comments me-2"></i>Bắt đầu tư vấn
+        </button>
+    </div>
+
+    <div id="roadmapList" style="display:none;"></div>
+</div>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/AiAdvisor/Roadmaps', {
+        headers: { 'RequestVerificationToken': getToken() }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        document.getElementById('roadmapLoading').style.display = 'none';
+        if (!data || data.length === 0) {
+            document.getElementById('roadmapEmpty').style.display = 'block';
+            return;
+        }
+        var list = document.getElementById('roadmapList');
+        list.style.display = 'block';
+
+        data.forEach(function(rm, idx) {
+            var date = new Date(rm.createdAt);
+            var dateStr = date.toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' }) + ' lúc ' +
+                date.getHours().toString().padStart(2,'0') + ':' + date.getMinutes().toString().padStart(2,'0');
+
+            var skills = tryParse(rm.kyNangCanBoSung);
+            var jobs = tryParse(rm.goiYCongViec);
+
+            var html = '<div class="roadmap-card" id="roadmap-' + rm.id + '">';
+
+            // Top bar
+            html += '<div class="roadmap-card-top">';
+            html += '<span class="roadmap-card-num">Lộ trình #' + (data.length - idx) + '</span>';
+            html += '<span class="roadmap-card-date"><i class="far fa-calendar-alt me-1"></i>' + dateStr + '</span>';
+            html += '</div>';
+
+            // Evaluation
+            if (rm.danhGiaChung) {
+                html += '<div class="roadmap-section">';
+                html += '<div class="roadmap-section-title"><i class="fas fa-clipboard-check me-2"></i>Đánh giá</div>';
+                html += '<div class="roadmap-eval">' + esc(rm.danhGiaChung).replace(/\n/g, '<br>') + '</div>';
+                html += '</div>';
+            }
+
+            // Skills
+            if (skills.length > 0) {
+                html += '<div class="roadmap-section">';
+                html += '<div class="roadmap-section-title"><i class="fas fa-lightbulb me-2"></i>Kỹ năng cần bổ sung</div>';
+                skills.forEach(function(s) {
+                    html += '<div class="skill-row">';
+                    html += '<span class="skill-badge">' + esc(s.ten_ky_nang) + '</span>';
+                    html += '<span class="skill-desc">' + esc(s.ly_do) + '</span>';
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+
+            // Jobs
+            if (jobs.length > 0) {
+                html += '<div class="roadmap-section">';
+                html += '<div class="roadmap-section-title"><i class="fas fa-briefcase me-2"></i>Gợi ý việc làm</div>';
+                jobs.forEach(function(j) {
+                    html += '<div class="job-row">';
+                    html += '<div><div class="job-title">' + esc(j.chuc_danh) + '</div>';
+                    if (j.muc_luong_du_kien) html += '<div class="job-salary">' + esc(j.muc_luong_du_kien) + '</div>';
+                    if (j.ly_do_phu_hop) html += '<div class="job-reason">' + esc(j.ly_do_phu_hop) + '</div>';
+                    html += '</div>';
+                    if (j.job_url) html += '<a href="' + j.job_url + '" class="btn btn-sm btn-outline-primary" target="_blank" style="border-radius:6px;font-size:12px;">Xem việc</a>';
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+
+            // Actions
+            html += '<div class="roadmap-card-actions">';
+            html += '<button class="btn btn-sm btn-outline-danger" onclick="delRoadmap(' + rm.id + ')" style="font-size:12px;border-radius:6px;"><i class="fas fa-trash-alt me-1"></i>Xóa</button>';
+            html += '</div></div>';
+
+            list.insertAdjacentHTML('beforeend', html);
+        });
+    })
+    .catch(function() {
+        document.getElementById('roadmapLoading').style.display = 'none';
+        document.getElementById('roadmapEmpty').style.display = 'block';
+    });
+});
+
+function delRoadmap(id) {
+    if (!confirm('Bạn có chắc muốn xóa lộ trình này?')) return;
+    fetch('/AiAdvisor/DeleteRoadmap?id=' + id, {
+        method: 'POST',
+        headers: { 'RequestVerificationToken': getToken() }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (d.success) {
+            var el = document.getElementById('roadmap-' + id);
+            if (el) el.remove();
+            if (!document.querySelector('.roadmap-card')) {
+                document.getElementById('roadmapList').style.display = 'none';
+                document.getElementById('roadmapEmpty').style.display = 'block';
+            }
+        }
+    });
+}
+
+function getToken() {
+    var el = document.querySelector('input[name="__RequestVerificationToken"]');
+    return el ? el.value : '';
+}
+function tryParse(s) { try { return JSON.parse(s || '[]'); } catch(e) { return []; } }
+function esc(t) { if (!t) return ''; var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+</script>
+}

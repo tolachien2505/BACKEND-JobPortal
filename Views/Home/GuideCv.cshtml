@@ -1,0 +1,329 @@
+@{
+    ViewData["Title"] = "Hướng dẫn viết CV chi tiết";
+}
+
+<style>
+    /* Ultra-minimalist modern typography & spacing */
+    :root {
+        --text-primary: #111827;
+        --text-secondary: #4b5563;
+        --text-tertiary: #9ca3af;
+        --accent-color: #0f172a;
+        --bg-subtle: #f9fafb;
+    }
+
+    body {
+        background-color: #ffffff;
+    }
+
+    .cv-guide-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
+        padding-bottom: 6rem;
+    }
+
+    .guide-header {
+        padding: 5rem 0 4rem 0;
+        text-align: center;
+        border-bottom: 1px solid #e5e7eb;
+        margin-bottom: 4rem;
+    }
+
+    .guide-title {
+        font-size: 2.75rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+        margin-bottom: 1.25rem;
+    }
+
+    .guide-subtitle {
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+        font-weight: 400;
+    }
+
+    .guide-section {
+        margin-bottom: 4.5rem;
+    }
+
+    .guide-section-number {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-tertiary);
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .guide-section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 2rem;
+        letter-spacing: -0.01em;
+    }
+
+    .guide-block {
+        margin-bottom: 2.5rem;
+    }
+
+    .guide-h4 {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .guide-text {
+        color: var(--text-secondary);
+        line-height: 1.7;
+        font-size: 1.05rem;
+        margin-bottom: 1rem;
+    }
+
+    .guide-list {
+        padding-left: 0;
+        list-style: none;
+    }
+
+    .guide-list li {
+        position: relative;
+        padding-left: 1.75rem;
+        margin-bottom: 1rem;
+        color: var(--text-secondary);
+        line-height: 1.7;
+        font-size: 1.05rem;
+    }
+
+    .guide-list li::before {
+        content: "—";
+        position: absolute;
+        left: 0;
+        color: var(--text-tertiary);
+        font-weight: 300;
+    }
+
+    .guide-list li strong {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .example-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    @@media (min-width: 768px) {
+        .example-container {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    .example-card {
+        padding: 1.5rem;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .example-card-bad {
+        background-color: var(--bg-subtle);
+        border-left: 3px solid #e5e7eb;
+        color: var(--text-secondary);
+    }
+    
+    .example-card-bad .ex-title {
+        color: #6b7280;
+    }
+
+    .example-card-good {
+        background-color: #f0fdf4;
+        border-left: 3px solid #22c55e;
+        color: #166534;
+    }
+    
+    .example-card-good .ex-title {
+        color: #15803d;
+    }
+
+    .ex-title {
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .pro-tip {
+        margin-top: 3rem;
+        padding: 2rem;
+        background-color: var(--bg-subtle);
+        border-radius: 12px;
+        position: relative;
+    }
+
+    .pro-tip-title {
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .action-section {
+        margin-top: 6rem;
+        text-align: center;
+        padding-top: 4rem;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    .btn-minimal {
+        background-color: var(--accent-color);
+        color: white;
+        padding: 1rem 2.5rem;
+        font-size: 1.05rem;
+        font-weight: 500;
+        border-radius: 99px;
+        transition: all 0.2s;
+        border: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+    
+    .btn-minimal:hover {
+        background-color: #1e293b;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<div class="container cv-guide-wrapper">
+    
+    <header class="guide-header">
+        <h1 class="guide-title">Bí quyết viết CV Chinh phục <br> Nhà tuyển dụng</h1>
+        <p class="guide-subtitle">
+            Một bản sơ yếu lý lịch hoàn hảo không nằm ở thiết kế cầu kỳ, mà ở sự logic, rõ ràng và dữ liệu thuyết phục. Dưới đây là triết lý viết CV chuẩn mực.
+        </p>
+    </header>
+
+    <!-- Cấu trúc cơ bản -->
+    <section class="guide-section">
+        <div class="guide-section-number">Phần 01</div>
+        <h2 class="guide-section-title">Cấu trúc Chuẩn mực</h2>
+        <p class="guide-text mb-4">Mọi CV chuyên nghiệp cần tuân thủ cấu trúc tối giản và dễ đọc. Đừng sáng tạo sai cách với bố cục. Hãy đi từ trên xuống dưới theo mức độ ưu tiên quan trọng.</p>
+        
+        <div class="row mt-5">
+            <div class="col-md-6 guide-block">
+                <h4 class="guide-h4">Thông tin Liên hệ</h4>
+                <ul class="guide-list">
+                    <li><strong>Bắt buộc:</strong> Họ và tên in hoa rõ ràng, Số điện thoại hiện dùng, Địa chỉ Email đứng đắn (vd: nguyen.van.a@gmail.com).</li>
+                    <li><strong>Hoàn thiện:</strong> Đường dẫn LinkedIn, hoặc GitHub/Portfolio nếu đặc thù ngành yêu cầu.</li>
+                    <li><strong>Tối kỵ:</strong> Email thiếu nghiêm túc, tình trạng hôn nhân, tôn giáo, hay số CCCD.</li>
+                </ul>
+            </div>
+            <div class="col-md-6 guide-block">
+                <h4 class="guide-h4">Tóm tắt Mục tiêu</h4>
+                <ul class="guide-list">
+                    <li>Chỉ nên giới hạn trong 2-3 câu ngắn gọn.</li>
+                    <li><strong>Người có kinh nghiệm:</strong> Nhấn mạnh thành tựu lớn nhất và định hướng chuyên sâu.</li>
+                    <li><strong>Fresher/Sinh viên:</strong> Thể hiện thái độ cầu thị, định vị rõ bản thân phù hợp với vị trí ứng tuyển.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Kinh nghiệm làm việc -->
+    <section class="guide-section">
+        <div class="guide-section-number">Phần 02</div>
+        <h2 class="guide-section-title">Chứng minh Kinh nghiệm</h2>
+        <p class="guide-text">Đây là nội dung quyết định 80% cơ hội của bạn. Hãy sắp xếp thời gian làm việc đảo ngược (mới nhất lên đầu) và tuyệt đối <strong>viết bằng kết quả định lượng, không liệt kê nhiệm vụ.</strong></p>
+        
+        <ul class="guide-list mt-4">
+            <li>Sử dụng cấu trúc: <strong>[Vị trí] – [Công ty] | [Thời gian]</strong></li>
+            <li>Trình bày dưới dạng gạch đầu dòng (Bullet points). Tối đa 3-5 ý cho mỗi vị trí công việc.</li>
+            <li>Ghi chú theo phương pháp <strong>STAR</strong>: Tình huống (Situation) - Nhiệm vụ (Task) - Hành động (Action) - Kết quả (Result).</li>
+        </ul>
+
+        <div class="example-container">
+            <div class="example-card example-card-bad">
+                <div class="ex-title">Cách viết Liệt kê (Nên tránh)</div>
+                <div>— Phụ trách bán hàng cho công ty.</div>
+                <div>— Quản lý fanpage và lên bài viết hàng ngày.</div>
+                <div>— Tham gia phát triển dự án phần mềm của team.</div>
+            </div>
+            <div class="example-card example-card-good">
+                <div class="ex-title">Cách viết Định lượng (Nên dùng)</div>
+                <div>— Vượt 20% KPI doanh số bán hàng quý 3/2023, mang về 500 triệu VNĐ.</div>
+                <div>— Tăng 30% lượng tương tác tự nhiên (đạt 10k likes) trong 2 tháng.</div>
+                <div>— Cải thiện tốc độ tải trang 40% bằng tối ưu truy vấn SQL.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Kỹ năng & Học vấn -->
+    <section class="guide-section">
+        <div class="guide-section-number">Phần 03</div>
+        <h2 class="guide-section-title">Kỹ năng & Nền tảng</h2>
+        
+        <div class="guide-block mt-4">
+            <h4 class="guide-h4">Tối ưu Kỹ năng (Skills)</h4>
+            <p class="guide-text">Hệ thống ATS thường quét từ khóa từ phần này. Hãy lọc những kỹ năng sát với tin tuyển dụng nhất.</p>
+            <ul class="guide-list">
+                <li><strong>Chuyên môn (Hard Skills):</strong> Liệt kê chính xác công cụ, ngôn ngữ, nền tảng (vd: Python, ReactJS, Photoshop, Google Ads).</li>
+                <li><strong>Kỹ năng mềm (Soft Skills):</strong> Chỉ liệt kê khi bạn có thể minh chứng bằng số liệu ở phần kinh nghiệm. Đừng ghi chung chung "Giao tiếp, Làm việc nhóm".</li>
+            </ul>
+        </div>
+
+        <div class="guide-block mt-5">
+            <h4 class="guide-h4">Học vấn & Chứng chỉ</h4>
+            <ul class="guide-list">
+                <li>Bắt đầu từ bậc Cao đẳng/Đại học. Cấu trúc: <strong>Trường – Chuyên ngành – Năm tốt nghiệp</strong>.</li>
+                <li>Chỉ đưa điểm GPA nếu thực sự ấn tượng (Khá/Giỏi).</li>
+                <li>Đính kèm các chứng chỉ ngoại ngữ (IELTS, TOEIC) và chứng chỉ nghề nghiệp quốc tế nếu có.</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Hình thức và Format -->
+    <section class="guide-section">
+        <div class="guide-section-number">Phần 04</div>
+        <h2 class="guide-section-title">Sự Tinh tế trong Trình bày</h2>
+        <p class="guide-text mb-4">Một bản CV tốt có thể bị loại ngay lập tức nếu mắc lỗi sơ đẳng về hình thức.</p>
+        
+        <ul class="guide-list">
+            <li><strong>Độ dài:</strong> Tối ưu trong 1 trang A4. Tối đa 2 trang nếu trên 5 năm kinh nghiệm.</li>
+            <li><strong>Khoảng trắng (Whitespace):</strong> Để dòng chảy thông tin được "thở". Không nhồi nhét quá nhiều chữ cái vào một trang.</li>
+            <li><strong>Typography:</strong> Dùng font không chân hiện đại (Inter, Roboto, Arial). Cỡ chữ 11pt, dòng cách dòng 1.5.</li>
+            <li><strong>Định dạng tối thượng:</strong> Tuyệt đối chỉ gửi file <strong>PDF</strong>.</li>
+            <li><strong>Tên file tiêu chuẩn:</strong> <code>[Vị trí]_[Họ và tên]_CV.pdf</code> (Ví dụ: <code>Marketing_NguyenVanA_CV.pdf</code>)</li>
+        </ul>
+
+        <div class="pro-tip">
+            <div class="pro-tip-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                Quy tắc "Customize"
+            </div>
+            <p class="guide-text mb-0 mt-2">Đừng bao giờ dùng một bản CV gửi cho hàng chục vị trí khác nhau. Hãy xây dựng một "Master CV", và tinh chỉnh sửa đổi nội dung cụ thể cho từng Công ty (Job Description) mà bạn nộp đơn để đánh gục Nhà tuyển dụng.</p>
+        </div>
+    </section>
+
+    <div class="action-section">
+        <h3 class="mb-4" style="font-weight: 700; color: var(--text-primary);">Tất cả đã sẵn sàng?</h3>
+        <a asp-area="Candidate" asp-controller="Cvs" asp-action="Upload" class="btn-minimal">
+            Tải CV lên Hệ thống
+        </a>
+    </div>
+
+</div>

@@ -1,0 +1,298 @@
+@model JobPortal.Models.Entities.Job
+@using Microsoft.AspNetCore.Identity
+@using JobPortal.Models.Entities
+@inject SignInManager<ApplicationUser> SignInManager
+
+@{
+    ViewData["Title"] = Model.Title;
+    var hasSalary = Model.SalaryMin is not null || Model.SalaryMax is not null;
+    var company = Model.Company;
+    var companyName = company?.CompanyName ?? "Chua cap nhat cong ty";
+    var categoryName = Model.Category?.Name ?? "Chua phan loai";
+}
+
+@section Styles {
+<style>
+    .detail-hero {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2d5f8a 100%);
+        padding: 32px 0;
+        color: #fff;
+    }
+    .detail-hero h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+    .detail-hero-company { font-size: 15px; opacity: 0.85; margin-bottom: 14px; }
+    .detail-hero-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .detail-tag {
+        background: rgba(255,255,255,0.15);
+        color: #fff;
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center; 
+        gap: 5px;
+    }
+    .detail-salary-box {
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.25);
+        border-radius: 10px;
+        padding: 14px 20px;
+        text-align: right;
+    }
+    .detail-salary-val { font-size: 20px; font-weight: 700; }
+    .detail-salary-label { font-size: 12px; opacity: 0.7; }
+    .detail-meta { font-size: 12px; opacity: 0.7; margin-top: 8px; }
+
+    .detail-body { padding: 30px 0 40px; }
+
+    .detail-section {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 24px;
+        margin-bottom: 20px;
+    }
+    .detail-section h5 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1e3a5f;
+        margin-bottom: 16px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    .detail-section .content { font-size: 14px; color: #374151; line-height: 1.75; }
+    .detail-section .content ul { padding-left: 18px; }
+    .detail-section .content li { margin-bottom: 6px; }
+
+    .sidebar-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 16px;
+    }
+    .sidebar-card h6 {
+        font-size: 14px;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 14px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    .apply-btn {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        border-radius: 8px;
+        border: none;
+        background: #1e3a5f;
+        color: #fff;
+        text-align: center;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+    .apply-btn:hover { background: #163050; color: #fff; }
+    .apply-btn i { margin-right: 6px; }
+
+    .sidebar-action {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 8px;
+        border: 1.5px solid #e5e7eb;
+        background: #fff;
+        color: #4b5563;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+    }
+    .sidebar-action:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+        color: #111827;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .sidebar-action.is-saved {
+        border-color: #fee2e2;
+        background: #fff1f2;
+        color: #e11d48;
+    }
+    .sidebar-action.is-saved:hover {
+        background: #ffe4e6;
+        border-color: #fecaca;
+    }
+    .sidebar-action i { font-size: 16px; }
+    .sidebar-action .fa-heart.active { color: #e11d48; }
+
+    .company-name { font-weight: 600; font-size: 15px; color: #111; margin-bottom: 6px; }
+    .company-meta { font-size: 13px; color: #6b7280; margin-bottom: 4px; }
+    .company-meta i { width: 16px; margin-right: 4px; text-align: center; }
+    .company-desc { font-size: 13px; color: #9ca3af; margin-top: 10px; line-height: 1.5; }
+</style>
+}
+
+<!-- Hero -->
+<div class="detail-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1>@Model.Title</h1>
+                <div class="detail-hero-company">
+                    <i class="fas fa-building me-1"></i>@companyName
+                    <span class="mx-2">•</span>
+                    <i class="fas fa-tag me-1"></i>@categoryName
+                </div>
+                <div class="detail-hero-tags">
+                    @if (!string.IsNullOrWhiteSpace(Model.Location))
+                    {
+                        <span class="detail-tag"><i class="fas fa-map-marker-alt"></i>@Model.Location</span>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.JobType))
+                    {
+                        <span class="detail-tag"><i class="fas fa-clock"></i>@Model.JobType</span>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.ExperienceLevel))
+                    {
+                        <span class="detail-tag"><i class="fas fa-star"></i>@Model.ExperienceLevel</span>
+                    }
+                    @if (Model.Vacancies is not null)
+                    {
+                        <span class="detail-tag"><i class="fas fa-users"></i>@Model.Vacancies vị trí</span>
+                    }
+                    @if (Model.IsFeatured)
+                    {
+                        <span class="detail-tag" style="background:rgba(16,185,129,0.3);"><i class="fas fa-bolt"></i>Nổi bật</span>
+                    }
+                </div>
+            </div>
+            <div class="col-lg-4 mt-3 mt-lg-0">
+                <div class="detail-salary-box">
+                    @if (hasSalary)
+                    {
+                        <div class="detail-salary-val">@($"{Model.SalaryMin:N0}") - @($"{Model.SalaryMax:N0}") VNĐ</div>
+                        <div class="detail-salary-label">Mức lương</div>
+                    }
+                    else
+                    {
+                        <div class="detail-salary-val">Thỏa thuận</div>
+                        <div class="detail-salary-label">Mức lương</div>
+                    }
+                    <div class="detail-meta">
+                        <i class="far fa-calendar-alt me-1"></i>Đăng @(Model.PostedDate.ToString("dd/MM/yyyy"))
+                        @if (Model.ExpiryDate is not null)
+                        {
+                            <span class="mx-1">•</span>
+                            <span><i class="far fa-clock me-1"></i>Hạn </span>@(Model.ExpiryDate.Value.ToString("dd/MM/yyyy"))
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Body -->
+<div class="detail-body">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <div class="detail-section">
+                    <h5><i class="fas fa-align-left me-2"></i>Mô tả công việc</h5>
+                    <div class="content">@Html.Raw(Model.Description.Replace("\n", "<br/>"))</div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Requirements))
+                {
+                    <div class="detail-section">
+                        <h5><i class="fas fa-list-check me-2"></i>Yêu cầu ứng viên</h5>
+                        <div class="content">@Html.Raw(Model.Requirements.Replace("\n", "<br/>"))</div>
+                    </div>
+                }
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Apply Card -->
+                <div class="sidebar-card" style="position:sticky;top:80px;">
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        if (User.IsInRole("Candidate"))
+                        {
+                            <a class="apply-btn mb-3" asp-area="Candidate" asp-controller="Applications" asp-action="Create" asp-route-jobId="@Model.Id">
+                                <i class="fas fa-paper-plane"></i>Ứng tuyển ngay
+                            </a>
+                            <form method="post" asp-area="Candidate" asp-controller="SavedJobs" asp-action="Toggle">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="jobId" value="@Model.Id" />
+                                <input type="hidden" name="returnUrl" value="@Url.Action("Details","Jobs", new { area = "", id = Model.Id })" />
+                                @if (ViewBag.IsSaved == true)
+                                {
+                                    <button type="submit" class="sidebar-action is-saved">
+                                        <i class="fas fa-heart"></i> Đã lưu việc làm
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="submit" class="sidebar-action">
+                                        <i class="far fa-heart"></i> Lưu việc làm
+                                    </button>
+                                }
+                            </form>
+                        }
+                        else
+                        {
+                            <div class="text-muted" style="font-size:13px;text-align:center;padding:10px 0;">
+                                Chỉ tài khoản Ứng viên mới có thể ứng tuyển.
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center mb-3" style="font-size:13px;color:#6b7280;">
+                            Đăng nhập để ứng tuyển vị trí này
+                        </div>
+                        <a class="apply-btn" asp-area="Client" asp-controller="Account" asp-action="Login"
+                           asp-route-returnUrl="@Url.Action("Details","Jobs", new { id = Model.Id })">
+                            <i class="fas fa-sign-in-alt"></i>Đăng nhập
+                        </a>
+                    }
+                </div>
+
+                <!-- Company Card -->
+                <div class="sidebar-card">
+                    <h6><i class="fas fa-building me-2"></i>Thông tin công ty</h6>
+                    <div class="text-center mb-3">
+                        @if (!string.IsNullOrEmpty(company?.Logo))
+                        {
+                            <img src="@company.Logo" alt="@companyName" style="max-width:100px; height:auto; border-radius:12px; border:1px solid #eee; padding:5px;" />
+                        }
+                    </div>
+                    <div class="company-name text-center">@companyName</div>
+                    <hr />
+                    @if (!string.IsNullOrWhiteSpace(company?.Address))
+                    {
+                        <div class="company-meta"><i class="fas fa-location-dot"></i>@company.Address</div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(company?.Website))
+                    {
+                        <div class="company-meta">
+                            <i class="fas fa-globe"></i><a href="@company.Website" target="_blank" rel="noopener" style="color:#1e3a5f;">@company.Website</a>
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(company?.Description))
+                    {
+                        <div class="company-desc mt-3" style="font-size:13px; color:#4b5563; line-height:1.6;">@company.Description</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

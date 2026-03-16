@@ -1,0 +1,113 @@
+@model JobPortal.Models.Entities.Company
+
+@{
+    ViewData["Title"] = "Thông tin công ty";
+}
+
+<div class="d-flex align-items-end justify-content-between mb-4">
+    <div>
+        <h3 class="mb-1 fw-bold text-gray-900">Thông tin công ty</h3>
+        <div class="text-muted small">Cập nhật hồ sơ công ty chuyên nghiệp trước khi đăng tin tuyển dụng.</div>
+    </div>
+    <a class="emp-btn emp-btn-secondary" asp-area="Employer" asp-controller="Jobs" asp-action="Index">
+        <i class="fas fa-list me-2"></i>Quản lý việc làm
+    </a>
+</div>
+
+<div class="emp-card">
+    <div class="emp-card-header">
+        <div>
+            <h4 class="emp-card-title">Hồ sơ Doanh nghiệp</h4>
+            <p class="emp-card-desc">Hiển thị công khai với ứng viên khi họ xem tin tuyển dụng của bạn.</p>
+        </div>
+    </div>
+    <div class="emp-card-body">
+        <form method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="row g-4">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label class="emp-form-label">Tên công ty <span class="text-danger">*</span></label>
+                        <input asp-for="CompanyName" class="emp-form-control" placeholder="Tên đầy đủ của doanh nghiệp..." />
+                        <span asp-validation-for="CompanyName" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="emp-form-label">Mô tả công ty</label>
+                        <textarea asp-for="Description" class="emp-form-control" rows="5" placeholder="Giới thiệu nhanh về môi trường làm việc, văn hóa, định hướng..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger small mt-1 d-block"></span>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="emp-form-label">Logo (URL Hình ảnh)</label>
+                        <input asp-for="Logo" class="emp-form-control" placeholder="https://..." onchange="document.getElementById('logoPreview').src = this.value || '/images/hero-illustration.png'" />
+                        <span asp-validation-for="Logo" class="text-danger small mt-1 d-block"></span>
+                    </div>
+                    
+                    <div class="text-center p-3 border rounded bg-light" style="border-radius: 12px !important;">
+                        <img id="logoPreview" src="@(string.IsNullOrEmpty(Model.Logo) ? "/images/hero-illustration.png" : Model.Logo)" alt="Preview Logo" style="max-width: 120px; max-height: 120px; object-fit: contain; border-radius: 8px; mix-blend-mode: multiply;" onerror="this.src='/images/hero-illustration.png'"/>
+                        <div class="small text-muted mt-2">Ảnh xem trước</div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4 text-muted" style="opacity: 0.15;" />
+
+            <h5 class="fw-bold mb-3 fs-6">Thông tin liên hệ & Cơ bản</h5>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="emp-form-label">Lĩnh vực hoạt động (Ngành)</label>
+                    <div class="position-relative">
+                        <i class="fas fa-briefcase position-absolute text-muted" style="top: 14px; left: 14px;"></i>
+                        <input asp-for="Industry" class="emp-form-control" placeholder="Ví dụ: Công nghệ thông tin, Giáo dục..." style="padding-left: 38px;" />
+                    </div>
+                    <span asp-validation-for="Industry" class="text-danger small mt-1 d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label class="emp-form-label">Quy mô nhân sự</label>
+                    <div class="position-relative">
+                        <i class="fas fa-users position-absolute text-muted" style="top: 14px; left: 14px;"></i>
+                        <select asp-for="CompanySize" class="emp-form-control" style="padding-left: 38px;">
+                            <option value="">-- Chọn quy mô --</option>
+                            <option value="Dưới 10 người">Dưới 10 người</option>
+                            <option value="10 - 50 người">10 - 50 người</option>
+                            <option value="50 - 150 người">50 - 150 người</option>
+                            <option value="150 - 500 người">150 - 500 người</option>
+                            <option value="Trên 500 người">Trên 500 người</option>
+                        </select>
+                    </div>
+                    <span asp-validation-for="CompanySize" class="text-danger small mt-1 d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label class="emp-form-label">Địa chỉ trụ sở</label>
+                    <div class="position-relative">
+                        <i class="fas fa-map-marker-alt position-absolute text-muted" style="top: 14px; left: 14px;"></i>
+                        <input asp-for="Address" class="emp-form-control" placeholder="Số nhà, Đường, Quận/Huyện, Tỉnh/TP" style="padding-left: 38px;" />
+                    </div>
+                    <span asp-validation-for="Address" class="text-danger small mt-1 d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label class="emp-form-label">Website công ty</label>
+                    <div class="position-relative">
+                        <i class="fas fa-globe position-absolute text-muted" style="top: 14px; left: 14px;"></i>
+                        <input asp-for="Website" class="emp-form-control" placeholder="https://..." style="padding-left: 38px;" />
+                    </div>
+                    <span asp-validation-for="Website" class="text-danger small mt-1 d-block"></span>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top d-flex gap-2">
+                <button type="submit" class="emp-btn emp-btn-primary">
+                    <i class="fas fa-save me-2"></i>Lưu thông tin
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

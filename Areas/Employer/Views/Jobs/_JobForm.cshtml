@@ -1,0 +1,118 @@
+@model JobPortal.Models.Entities.Job
+
+@{
+    var categories = (Microsoft.AspNetCore.Mvc.Rendering.SelectList)ViewBag.Categories;
+}
+
+<div class="row g-4">
+    <!-- Cột trái: Thông tin chính -->
+    <div class="col-md-8">
+        <h5 class="fw-bold fs-6 mb-3 text-gray-900 border-bottom pb-2">Thông tin chính</h5>
+        
+        <div class="mb-3">
+            <label class="emp-form-label">Tiêu đề công việc <span class="text-danger">*</span></label>
+            <input asp-for="Title" class="emp-form-control" placeholder="VD: Senior .NET Developer" />
+            <span asp-validation-for="Title" class="text-danger small mt-1 d-block"></span>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="emp-form-label">Ngành nghề <span class="text-danger">*</span></label>
+                <div class="position-relative">
+                    <i class="fas fa-layer-group position-absolute text-muted" style="top: 14px; left: 14px;"></i>
+                    <select asp-for="CategoryId" class="emp-form-control" asp-items="categories" style="padding-left: 38px;">
+                        <option value="">-- Chọn ngành nghề --</option>
+                    </select>
+                </div>
+                <span asp-validation-for="CategoryId" class="text-danger small mt-1 d-block"></span>
+            </div>
+            
+            <div class="col-md-6">
+                <label class="emp-form-label">Khu vực làm việc</label>
+                <div class="position-relative">
+                    <i class="fas fa-map-marker-alt position-absolute text-muted" style="top: 14px; left: 14px;"></i>
+                    <input asp-for="Location" class="emp-form-control" placeholder="Hà Nội, Hồ Chí Minh, Remote..." style="padding-left: 38px;" />
+                </div>
+                <span asp-validation-for="Location" class="text-danger small mt-1 d-block"></span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="emp-form-label">Mô tả công việc <span class="text-danger">*</span></label>
+            <textarea asp-for="Description" class="emp-form-control" rows="6" placeholder="Mô tả chi tiết các công việc cần làm..."></textarea>
+            <span asp-validation-for="Description" class="text-danger small mt-1 d-block"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="emp-form-label">Yêu cầu công việc</label>
+            <textarea asp-for="Requirements" class="emp-form-control" rows="5" placeholder="Các kỹ năng, kinh nghiệm cần thiết..."></textarea>
+            <span asp-validation-for="Requirements" class="text-danger small mt-1 d-block"></span>
+        </div>
+    </div>
+
+    <!-- Cột phải: Thông tin bổ sung -->
+    <div class="col-md-4">
+        <h5 class="fw-bold fs-6 mb-3 text-gray-900 border-bottom pb-2">Thu nhập & Chế độ</h5>
+        
+        <div class="row g-3 mb-3">
+            <div class="col-6">
+                <label class="emp-form-label">Lương tối thiểu (VNĐ)</label>
+                <input asp-for="SalaryMin" class="emp-form-control" type="number" step="1000000" placeholder="VD: 10000000" />
+                <span asp-validation-for="SalaryMin" class="text-danger small mt-1 d-block"></span>
+            </div>
+            <div class="col-6">
+                <label class="emp-form-label">Lương tối đa (VNĐ)</label>
+                <input asp-for="SalaryMax" class="emp-form-control" type="number" step="1000000" placeholder="VD: 20000000" />
+                <span asp-validation-for="SalaryMax" class="text-danger small mt-1 d-block"></span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="emp-form-label">Loại hình</label>
+            <select asp-for="JobType" class="emp-form-control">
+                <option value="">-- Chọn loại --</option>
+                <option value="Full-time">Toàn thời gian (Full-time)</option>
+                <option value="Part-time">Bán thời gian (Part-time)</option>
+                <option value="Internship">Thực tập (Internship)</option>
+                <option value="Contract">Khế ước (Contract)</option>
+            </select>
+            <span asp-validation-for="JobType" class="text-danger small mt-1 d-block"></span>
+        </div>
+        
+        <div class="mb-3">
+            <label class="emp-form-label">Cấp bậc / Kinh nghiệm</label>
+            <select asp-for="ExperienceLevel" class="emp-form-control">
+                <option value="">-- Chọn kinh nghiệm --</option>
+                <option value="Fresher">Mới tốt nghiệp (Fresher)</option>
+                <option value="Junior">Nhân viên (Junior)</option>
+                <option value="Mid">Chuyên viên (Mid-level)</option>
+                <option value="Senior">Quản lý / Chuyên gia (Senior)</option>
+            </select>
+            <span asp-validation-for="ExperienceLevel" class="text-danger small mt-1 d-block"></span>
+        </div>
+
+        <h5 class="fw-bold fs-6 mt-4 mb-3 text-gray-900 border-bottom pb-2">Thiết lập nộp hồ sơ</h5>
+
+        <div class="row g-3 mb-3">
+            <div class="col-6">
+                <label class="emp-form-label">Số lượng tuyển</label>
+                <input asp-for="Vacancies" class="emp-form-control" type="number" min="0" placeholder="VD: 5" />
+                <span asp-validation-for="Vacancies" class="text-danger small mt-1 d-block"></span>
+            </div>
+            <div class="col-6">
+                <label class="emp-form-label">Hạn nộp hồ sơ</label>
+                <input asp-for="ExpiryDate" class="emp-form-control" type="date" />
+                <span asp-validation-for="ExpiryDate" class="text-danger small mt-1 d-block"></span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="emp-form-label">Trạng thái tin báo</label>
+            <select asp-for="IsActive" class="emp-form-control">
+                <option value="true">Đang tuyển (Mở)</option>
+                <option value="false">Tạm đóng (Dừng nhận CV)</option>
+            </select>
+            <span asp-validation-for="IsActive" class="text-danger small mt-1 d-block"></span>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,190 @@
+@model JobPortal.Models.ViewModels.Account.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Đăng ký";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4">Đăng ký tài khoản</h2>
+                    
+                    @if (ViewData.ModelState.ErrorCount > 0 && !ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <p class="mb-0"><i class="fas fa-exclamation-circle me-1"></i>@error.ErrorMessage</p>
+                            }
+                        </div>
+                    }
+                    
+                    <form method="post" action="/Client/Account/Register" id="registerForm" novalidate>
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label class="form-label" for="FullName">Họ tên <span class="text-danger">*</span></label>
+                            <div class="input-group input-group-with-icon">
+                                <span class="input-group-text"><i class="fas fa-user text-muted"></i></span>
+                                <input type="text" id="FullName" name="FullName" class="form-control @(ViewData.ModelState["FullName"]?.Errors?.Count > 0 ? "is-invalid" : "")"
+                                       value="@Model?.FullName" placeholder="Nguyễn Văn A" required minlength="2" />
+                            </div>
+                            <div class="invalid-feedback @(ViewData.ModelState["FullName"]?.Errors?.Count > 0 ? "d-block" : "d-none")" id="FullNameError" role="alert">@(ViewData.ModelState["FullName"]?.Errors?.FirstOrDefault()?.ErrorMessage ?? "Vui lòng nhập họ tên (tối thiểu 2 ký tự).")</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label" for="Email">Email <span class="text-danger">*</span></label>
+                            <div class="input-group input-group-with-icon">
+                                <span class="input-group-text"><i class="fas fa-envelope text-muted"></i></span>
+                                <input type="email" id="Email" name="Email" class="form-control @(ViewData.ModelState["Email"]?.Errors?.Count > 0 ? "is-invalid" : "")"
+                                       value="@Model?.Email" placeholder="name@email.com" required />
+                            </div>
+                            <div class="invalid-feedback @(ViewData.ModelState["Email"]?.Errors?.Count > 0 ? "d-block" : "d-none")" id="EmailError" role="alert">@(ViewData.ModelState["Email"]?.Errors?.FirstOrDefault()?.ErrorMessage ?? "Vui lòng nhập địa chỉ email.")</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label" for="PhoneNumber">Số điện thoại</label>
+                            <div class="input-group input-group-with-icon">
+                                <span class="input-group-text"><i class="fas fa-phone text-muted"></i></span>
+                                <input type="text" id="PhoneNumber" name="PhoneNumber" class="form-control @(ViewData.ModelState["PhoneNumber"]?.Errors?.Count > 0 ? "is-invalid" : "")"
+                                       value="@Model?.PhoneNumber" placeholder="09xxxxxxxxx" />
+                            </div>
+                            <div class="invalid-feedback @(ViewData.ModelState["PhoneNumber"]?.Errors?.Count > 0 ? "d-block" : "d-none")" id="PhoneNumberError" role="alert">@(ViewData.ModelState["PhoneNumber"]?.Errors?.FirstOrDefault()?.ErrorMessage ?? "Số điện thoại không hợp lệ.")</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label" for="Role">Loại tài khoản <span class="text-danger">*</span></label>
+                            <div class="input-group input-group-with-icon">
+                                <span class="input-group-text"><i class="fas fa-user-tag text-muted"></i></span>
+                                <select id="Role" name="Role" class="form-select @(ViewData.ModelState["Role"]?.Errors?.Count > 0 ? "is-invalid" : "")" required>
+                                    <option value="Candidate" selected="@(Model?.Role == "Candidate" || Model?.Role == null)">Ứng viên (tìm việc)</option>
+                                    <option value="Employer" selected="@(Model?.Role == "Employer")">Nhà tuyển dụng (đăng tin)</option>
+                                </select>
+                            </div>
+                            <div class="invalid-feedback @(ViewData.ModelState["Role"]?.Errors?.Count > 0 ? "d-block" : "d-none")" id="RoleError" role="alert">@(ViewData.ModelState["Role"]?.Errors?.FirstOrDefault()?.ErrorMessage ?? "Vui lòng chọn loại tài khoản.")</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label" for="Password">Mật khẩu <span class="text-danger">*</span></label>
+                            <div class="input-group input-group-with-icon">
+                                <span class="input-group-text"><i class="fas fa-lock text-muted"></i></span>
+                                <input type="password" id="Password" name="Password" class="form-control @(ViewData.ModelState["Password"]?.Errors?.Count > 0 ? "is-invalid" : "")"
+                                       placeholder="Tối thiểu 6 ký tự" required minlength="6" />
+                                <button type="button" class="input-group-text btn btn-outline-secondary toggle-password" data-target="Password" aria-label="Hiện/ẩn mật khẩu">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback @(ViewData.ModelState["Password"]?.Errors?.Count > 0 ? "d-block" : "d-none")" id="PasswordError" role="alert">@(ViewData.ModelState["Password"]?.Errors?.FirstOrDefault()?.ErrorMessage ?? "Vui lòng nhập mật khẩu (tối thiểu 6 ký tự).")</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label" for="ConfirmPassword">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                            <div class="input-group input-group-with-icon">
+                                <span class="input-group-text"><i class="fas fa-shield-alt text-muted"></i></span>
+                                <input type="password" id="ConfirmPassword" name="ConfirmPassword" class="form-control @(ViewData.ModelState["ConfirmPassword"]?.Errors?.Count > 0 ? "is-invalid" : "")"
+                                       placeholder="Nhập lại mật khẩu" required />
+                            </div>
+                            <div class="invalid-feedback @(ViewData.ModelState["ConfirmPassword"]?.Errors?.Count > 0 ? "d-block" : "d-none")" id="ConfirmPasswordError" role="alert">@(ViewData.ModelState["ConfirmPassword"]?.Errors?.FirstOrDefault()?.ErrorMessage ?? "Vui lòng nhập lại mật khẩu đúng với mật khẩu ở trên.")</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="form-check @(ViewData.ModelState["AcceptTerms"]?.Errors?.Count > 0 ? "is-invalid" : "")" id="AcceptTermsWrap">
+                                <input type="checkbox" name="AcceptTerms" value="true" class="form-check-input" id="AcceptTerms" required />
+                                <label class="form-check-label" for="AcceptTerms">
+                                    Tôi đồng ý với <a href="#" class="text-primary">Điều khoản sử dụng</a> và <a href="#" class="text-primary">Chính sách bảo mật</a> của JobPortal.
+                                </label>
+                            </div>
+                            <div class="invalid-feedback @(ViewData.ModelState["AcceptTerms"]?.Errors?.Count > 0 ? "d-block" : "d-none")" id="AcceptTermsError" role="alert">@(ViewData.ModelState["AcceptTerms"]?.Errors?.FirstOrDefault()?.ErrorMessage ?? "Bạn cần đồng ý với điều khoản sử dụng để tiếp tục.")</div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100" id="btnRegister">Tạo tài khoản</button>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <p>Đã có tài khoản? <a href="/Client/Account/Login">Đăng nhập</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function() {
+            var form = document.getElementById('registerForm');
+            function showError(id, show) {
+                var el = document.getElementById(id + 'Error');
+                if (!el) return;
+                if (show) { el.classList.remove('d-none'); el.classList.add('d-block'); }
+                else { el.classList.add('d-none'); el.classList.remove('d-block'); }
+            }
+            function validateAndShowErrors() {
+                var fullName = document.getElementById('FullName');
+                var email = document.getElementById('Email');
+                var password = document.getElementById('Password');
+                var confirmPassword = document.getElementById('ConfirmPassword');
+                var acceptTerms = document.getElementById('AcceptTerms');
+                var phoneNumber = document.getElementById('PhoneNumber');
+                [fullName, email, password, confirmPassword, phoneNumber].forEach(function(input) {
+                    if (input) { input.classList.remove('is-invalid'); showError(input.id, false); }
+                });
+                acceptTerms.closest('.form-check').classList.remove('is-invalid');
+                showError('AcceptTerms', false);
+                var invalid = false;
+                if (!fullName.value.trim() || fullName.value.trim().length < 2) {
+                    fullName.classList.add('is-invalid'); showError('FullName', true); invalid = true;
+                }
+                if (!email.value.trim()) {
+                    email.classList.add('is-invalid'); showError('Email', true); invalid = true;
+                }
+                if (phoneNumber && phoneNumber.value.trim() && !/^0[0-9]{9,10}$/.test(phoneNumber.value.trim())) {
+                    phoneNumber.classList.add('is-invalid');
+                    document.getElementById('PhoneNumberError').textContent = 'Số điện thoại không hợp lệ. Ví dụ: 09xxxxxxxxx (10–11 số).';
+                    showError('PhoneNumber', true); invalid = true;
+                }
+                if (!password.value.trim() || password.value.length < 6) {
+                    password.classList.add('is-invalid'); showError('Password', true); invalid = true;
+                }
+                if (!confirmPassword.value.trim()) {
+                    confirmPassword.classList.add('is-invalid');
+                    document.getElementById('ConfirmPasswordError').textContent = 'Vui lòng nhập lại mật khẩu đúng với mật khẩu ở trên.';
+                    showError('ConfirmPassword', true); invalid = true;
+                } else if (password.value !== confirmPassword.value) {
+                    confirmPassword.classList.add('is-invalid');
+                    document.getElementById('ConfirmPasswordError').textContent = 'Mật khẩu xác nhận không trùng với mật khẩu đã nhập.';
+                    showError('ConfirmPassword', true); invalid = true;
+                }
+                if (!acceptTerms.checked) {
+                    acceptTerms.closest('.form-check').classList.add('is-invalid');
+                    showError('AcceptTerms', true); invalid = true;
+                }
+                return invalid;
+            }
+            form.addEventListener('submit', function(e) {
+                if (validateAndShowErrors()) e.preventDefault();
+            });
+            [ 'FullName', 'Email', 'Password', 'ConfirmPassword', 'PhoneNumber' ].forEach(function(id) {
+                var input = document.getElementById(id);
+                if (input) input.addEventListener('input', function() {
+                    input.classList.remove('is-invalid');
+                    showError(id, false);
+                });
+            });
+            document.getElementById('AcceptTerms').addEventListener('change', function() {
+                this.closest('.form-check').classList.remove('is-invalid');
+                showError('AcceptTerms', false);
+            });
+            document.querySelectorAll('.toggle-password').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var id = this.getAttribute('data-target');
+                    var input = document.getElementById(id);
+                    var icon = this.querySelector('i');
+                    if (input.type === 'password') { input.type = 'text'; icon.classList.replace('fa-eye', 'fa-eye-slash'); }
+                    else { input.type = 'password'; icon.classList.replace('fa-eye-slash', 'fa-eye'); }
+                });
+            });
+        })();
+    </script>
+}
