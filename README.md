@@ -228,4 +228,3 @@ Tuy nhiên cách ổn định nhất vẫn là mỗi máy chạy local sẽ dùn
 - Không commit `appsettings.Local.json` hoặc các khóa bảo mật thật lên GitHub
 =======
 # BACKEND-JobPortal
->>>>>>> 9f8553e9e2f6e0a25f8c6935fc290a0d396a1948
